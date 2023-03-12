@@ -1,15 +1,13 @@
 const mongoose = require("mongoose");
-
+const config = require("config");
 const app = require("express")();
 require("./startup/routes")(app);
 require("joi").objectId = require("joi-objectid")(require("joi"));
 
-mongoose
-  .connect("mongodb://localhost/projectEase", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("Connected to MongoDB..."));
-app.listen(3000, () => {
+const db = config.get("db");
+mongoose.connect(db).then(() => console.log("Connected to MongoDB..."));
+console.log(db);
+const server = app.listen(3000, () => {
   console.log("Server listening on port 3000");
 });
+module.exports = server;
