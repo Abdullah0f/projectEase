@@ -4,7 +4,6 @@ const asyncMiddleware = require("../middleware/async");
 const auth = require("../middleware/auth");
 router.get(
   "/",
-  auth,
   asyncMiddleware(async (req, res) => {
     const users = await User.find().sort("name");
     if (!users.length) return res.status(404).send("No users found.");

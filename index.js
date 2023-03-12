@@ -7,7 +7,7 @@ require("joi").objectId = require("joi-objectid")(require("joi"));
 const db = config.get("db");
 mongoose.connect(db).then(() => console.log("Connected to MongoDB..."));
 console.log(db);
-const server = app.listen(3000, () => {
+const server = app.listen(config.get("port"), () => {
   console.log("Server listening on port 3000");
 });
 module.exports = server;

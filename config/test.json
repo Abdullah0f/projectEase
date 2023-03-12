@@ -1,4 +1,5 @@
 {
     "db":"mongodb://localhost/projectEase_tests",
-    "jwtPrivateKey":"1234"
+    "jwtPrivateKey":"1234",
+    "port":0
 }

@@ -27,6 +27,7 @@ describe("Users", () => {
         password: "12345",
       }).save();
       const res = await request(server).get("/api/users");
+      console.log(res.body);
       expect(res.status).toBe(200);
       expect(res.body.length).toBe(2);
       expect(res.body.some((u) => u.username === "abc")).toBeTruthy();
@@ -125,10 +126,11 @@ describe("Users", () => {
       expect(user).not.toBeNull();
       expect(user).toHaveProperty("username", "abc");
     });
-    it("should return the user if it is valid", async () => {
+    it("should return the user with jwt as header if it is valid", async () => {
       const res = await exec();
       expect(res.body).toHaveProperty("_id");
       expect(res.body).toHaveProperty("username", "abc");
+      expect(res.header).toHaveProperty("x-auth-token");
     });
   });
   describe("PUT /users/:id", () => {
