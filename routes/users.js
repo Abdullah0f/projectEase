@@ -1,8 +1,10 @@
 const router = require("express").Router();
 const { User, validateUser } = require("../models/user");
 const asyncMiddleware = require("../middleware/async");
+const auth = require("../middleware/auth");
 router.get(
   "/",
+  auth,
   asyncMiddleware(async (req, res) => {
     const users = await User.find().sort("name");
     if (!users.length) return res.status(404).send("No users found.");
@@ -31,7 +33,7 @@ router.post(
       dob: req.body.dob,
     });
     await user.save();
-    res.send(user);
+    res.set("x-auth-token", user.generateAuthToken()).send(user);
   })
 );
 

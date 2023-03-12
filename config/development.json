@@ -1,3 +1,4 @@
 {
-    "db":"mongodb://localhost/projectEase"
+    "db":"mongodb://localhost/projectEase",
+    "jwtPrivateKey":"1234"
 }
