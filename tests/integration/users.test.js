@@ -10,9 +10,6 @@ describe("Users", () => {
     await User.deleteMany({});
     await server.close();
   });
-  afterAll(() => {
-    // mongoose.disconnect();
-  });
 
   describe("GET /users", () => {
     it("should return all users", async () => {

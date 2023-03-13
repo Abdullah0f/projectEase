@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const config = require("config");
 const Joi = require("joi");
-const { User } = require("./user");
+const { userSchema } = require("./user");
 const teamSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -18,11 +18,13 @@ const teamSchema = new mongoose.Schema({
     default: "Team Description",
   },
   owner: {
-    type: User,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: true,
   },
   members: {
-    type: [User],
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "User",
     required: true,
     default: [this.owner],
   },
@@ -54,12 +56,12 @@ teamSchema.methods.deleteTeam = function () {
 const Team = mongoose.model("Team", teamSchema);
 function validateTeam(team) {
   const schema = Joi.object({
-    name: Joi.string().min(3).max(50),
-    description: Joi.string().min(3).max(1024),
+    name: Joi.string().min(3).max(50).default("Team Name"),
+    description: Joi.string().min(3).max(1024).default("Team Description"),
     owner: Joi.objectId(),
     members: Joi.array().items(Joi.objectId()),
   });
   return schema.validate(team);
 }
 exports.Team = Team;
-exports.validate = validateTeam;
+exports.validateTeam = validateTeam;
