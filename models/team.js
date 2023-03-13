@@ -47,7 +47,7 @@ teamSchema.methods.addMember = function (user) {
   this.members.push(user);
 };
 teamSchema.methods.removeMember = function (user) {
-  this.members = this.members.filter((m) => m._id !== user._id);
+  this.members.splice(this.members.indexOf(user), 1);
 };
 teamSchema.methods.deleteTeam = function () {
   this.isDeleted = true;

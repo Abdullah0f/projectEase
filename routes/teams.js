@@ -66,18 +66,22 @@ router.post(
   auth,
   asyncMiddleware(async (req, res) => {
     const user = await User.findById(req.body.userId);
-    if (!user) return res.status(400).send("Invalid user.");
+    if (!user) return res.status(404).send("Invalid user.");
 
     const team = await Team.findById(req.params.id);
     if (!team)
       return res.status(404).send("The team with the given ID was not found.");
     if (team.isDeleted)
       return res.status(400).send("This team is already deleted.");
+    if (team.members.includes(user._id))
+      return res
+        .status(400)
+        .send("This user is already a member of this team.");
     if (!team.members.includes(req.user._id))
-      return res.status(401).send("You are NOT authorized to edit this team.");
+      return res.status(403).send("You are NOT authorized to edit this team.");
     team.addMember(user._id);
     await team.save();
-    res.send(team);
+    res.send(team.members);
   })
 );
 
@@ -86,7 +90,7 @@ router.delete(
   auth,
   asyncMiddleware(async (req, res) => {
     const user = await User.findById(req.params.userId);
-    if (!user) return res.status(400).send("Invalid user.");
+    if (!user) return res.status(404).send("Invalid user.");
 
     const team = await Team.findById(req.params.id);
     if (!team)
@@ -94,14 +98,17 @@ router.delete(
     if (team.isDeleted)
       return res.status(400).send("This team is already deleted.");
     if (!team.members.includes(req.user._id))
-      return res.status(401).send("You are NOT authorized to edit this team.");
+      return res.status(403).send("You are NOT authorized to edit this team.");
+    if (!team.members.includes(user._id))
+      return res.status(400).send("This user is not a member of this team.");
     if (team.members.length === 1)
       return res
         .status(400)
         .send("You cannot delete the last member of a team.");
     team.removeMember(user._id);
     await team.save();
-    res.send(team);
+
+    res.send(team.members);
   })
 );
 
