@@ -37,9 +37,69 @@ router.post(
     const team = new Team({
       name: req.body.name,
       description: req.body.description,
-      members,
+      members: members,
       owner: owner._id,
     });
+    await team.save();
+    res.send(team);
+  })
+);
+
+router.get(
+  "/:id/members",
+
+  asyncMiddleware(async (req, res) => {
+    const team = await Team.findById(req.params.id);
+    if (!team)
+      return res.status(404).send("The team with the given ID was not found.");
+    if (team.isDeleted)
+      return res.status(400).send("This team is already deleted.");
+
+    const members = await User.find({ _id: { $in: team.members } });
+    if (!members.length)
+      return res.status(404).send("No members found for this team.");
+    res.send(members);
+  })
+);
+router.post(
+  "/:id/members",
+  auth,
+  asyncMiddleware(async (req, res) => {
+    const user = await User.findById(req.body.userId);
+    if (!user) return res.status(400).send("Invalid user.");
+
+    const team = await Team.findById(req.params.id);
+    if (!team)
+      return res.status(404).send("The team with the given ID was not found.");
+    if (team.isDeleted)
+      return res.status(400).send("This team is already deleted.");
+    if (!team.members.includes(req.user._id))
+      return res.status(401).send("You are NOT authorized to edit this team.");
+    team.addMember(user._id);
+    await team.save();
+    res.send(team);
+  })
+);
+
+router.delete(
+  "/:id/members/:userId",
+  auth,
+  asyncMiddleware(async (req, res) => {
+    const user = await User.findById(req.params.userId);
+    if (!user) return res.status(400).send("Invalid user.");
+
+    const team = await Team.findById(req.params.id);
+    if (!team)
+      return res.status(404).send("The team with the given ID was not found.");
+    if (team.isDeleted)
+      return res.status(400).send("This team is already deleted.");
+    if (!team.members.includes(req.user._id))
+      return res.status(401).send("You are NOT authorized to edit this team.");
+    if (team.members.length === 1)
+      return res
+        .status(400)
+        .send("You cannot delete the last member of a team.");
+    team.removeMember(user._id);
     await team.save();
     res.send(team);
   })
@@ -61,8 +121,8 @@ router.put(
 
     if (team.isDeleted)
       return res.status(400).send("This team is already deleted.");
-    if (!team.members.some((x) => x._id == user._id))
-      return res.status(400).send("You are authorized to edit this team.");
+    if (!team.members.includes(req.user._id))
+      return res.status(401).send("You are NOT authorized to edit this team.");
 
     team.name = req.body.name;
     team.description = req.body.description;
@@ -85,7 +145,7 @@ router.delete(
     console.log(req.user._id);
 
     if (!team.members.some((x) => x._id == req.user._id))
-      return res.status(400).send("You are authorized to edit this team.");
+      return res.status(401).send("You are NOT authorized to edit this team.");
     team.isDeleted = true;
     await team.save();
     res.send(team);
