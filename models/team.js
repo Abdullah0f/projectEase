@@ -28,12 +28,16 @@ const teamSchema = new mongoose.Schema({
     required: true,
     default: [this.owner],
   },
-  dateCreated: {
+  createdAt: {
     type: Date,
     required: true,
     default: Date.now,
   },
-  dateDeleted: {
+  modfiedAt: {
+    type: Date,
+    default: Date.now,
+  },
+  deletedAt: {
     type: Date,
     required: false,
   },
@@ -52,6 +56,14 @@ teamSchema.methods.removeMember = function (user) {
 teamSchema.methods.deleteTeam = function () {
   this.isDeleted = true;
   this.dateDeleted = Date.now();
+};
+teamSchema.methods.updateTeam = function (team) {
+  this.name = team.name;
+  this.description = team.description;
+  this.modfiedAt = Date.now();
+};
+teamSchema.methods.isMember = function (user) {
+  return this.members.includes(user);
 };
 const Team = mongoose.model("Team", teamSchema);
 function validateTeam(team) {

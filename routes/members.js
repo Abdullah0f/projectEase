@@ -26,11 +26,11 @@ router.post(
     const team = req.team;
     const newUser = await User.findById(req.body.userId);
     if (!newUser) return res.status(404).send("user not found");
-    if (team.members.includes(newUser._id))
+    if (team.isMember(newUser._id))
       return res
         .status(400)
         .send("This user is already a member of this team.");
-    if (!team.members.includes(req.user._id))
+    if (!team.isMember(req.user._id))
       return res.status(403).send("You are NOT authorized to edit this team.");
     team.addMember(newUser._id);
     await team.save();
@@ -44,9 +44,9 @@ router.delete(
   asyncMiddleware(async (req, res) => {
     const user = req.paramUser;
     const team = req.team;
-    if (!team.members.includes(req.user._id))
+    if (!team.isMember(req.user._id))
       return res.status(403).send("You are NOT authorized to edit this team.");
-    if (!team.members.includes(user._id))
+    if (!team.isMember(user._id))
       return res.status(400).send("This user is not a member of this team.");
     if (team.members.length === 1)
       return res

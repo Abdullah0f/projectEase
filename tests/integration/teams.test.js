@@ -221,6 +221,7 @@ describe("Teams", () => {
       const deletedTeam = await Team.findById(team._id);
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("name", "team1");
+      expect(res.body).toHaveProperty("isDeleted", true);
       expect(deletedTeam).not.toBeNull();
       expect(deletedTeam).toHaveProperty("name", "team1");
       expect(deletedTeam).toHaveProperty("isDeleted", true);

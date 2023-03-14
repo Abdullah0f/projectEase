@@ -52,13 +52,11 @@ router.put(
     const user = req.user;
     const team = req.team;
 
-    if (!team.members.includes(user._id))
+    if (!team.isMember(user._id))
       return res.status(401).send("You are NOT authorized to edit this team.");
 
-    team.name = req.body.name;
-    team.description = req.body.description;
+    team.updateTeam(req.body);
     await team.save();
-
     res.send(team);
   })
 );
@@ -69,9 +67,9 @@ router.delete(
   asyncMiddleware(async (req, res) => {
     const team = req.team;
 
-    if (!team.members.includes(req.user._id))
+    if (!team.isMember(req.user._id))
       return res.status(401).send("You are NOT authorized to edit this team.");
-    team.isDeleted = true;
+    team.deleteTeam();
     await team.save();
     res.send(team);
   })
