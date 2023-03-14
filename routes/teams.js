@@ -31,8 +31,7 @@ router.post(
     const { error } = validateTeam(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
-    const owner = await User.findById(req.user._id);
-    if (!owner) return res.status(400).send("Invalid user.");
+    const owner = (await User.findById(req.body.owner)) || req.user;
     const members = [owner._id];
     const team = new Team({
       name: req.body.name,
@@ -45,73 +44,6 @@ router.post(
   })
 );
 
-router.get(
-  "/:id/members",
-
-  asyncMiddleware(async (req, res) => {
-    const team = await Team.findById(req.params.id);
-    if (!team)
-      return res.status(404).send("The team with the given ID was not found.");
-    if (team.isDeleted)
-      return res.status(400).send("This team is already deleted.");
-
-    const members = await User.find({ _id: { $in: team.members } });
-    if (!members.length)
-      return res.status(404).send("No members found for this team.");
-    res.send(members);
-  })
-);
-router.post(
-  "/:id/members",
-  auth,
-  asyncMiddleware(async (req, res) => {
-    const user = await User.findById(req.body.userId);
-    if (!user) return res.status(404).send("Invalid user.");
-
-    const team = await Team.findById(req.params.id);
-    if (!team)
-      return res.status(404).send("The team with the given ID was not found.");
-    if (team.isDeleted)
-      return res.status(400).send("This team is already deleted.");
-    if (team.members.includes(user._id))
-      return res
-        .status(400)
-        .send("This user is already a member of this team.");
-    if (!team.members.includes(req.user._id))
-      return res.status(403).send("You are NOT authorized to edit this team.");
-    team.addMember(user._id);
-    await team.save();
-    res.send(team.members);
-  })
-);
-
-router.delete(
-  "/:id/members/:userId",
-  auth,
-  asyncMiddleware(async (req, res) => {
-    const user = await User.findById(req.params.userId);
-    if (!user) return res.status(404).send("Invalid user.");
-
-    const team = await Team.findById(req.params.id);
-    if (!team)
-      return res.status(404).send("The team with the given ID was not found.");
-    if (team.isDeleted)
-      return res.status(400).send("This team is already deleted.");
-    if (!team.members.includes(req.user._id))
-      return res.status(403).send("You are NOT authorized to edit this team.");
-    if (!team.members.includes(user._id))
-      return res.status(400).send("This user is not a member of this team.");
-    if (team.members.length === 1)
-      return res
-        .status(400)
-        .send("You cannot delete the last member of a team.");
-    team.removeMember(user._id);
-    await team.save();
-
-    res.send(team.members);
-  })
-);
-
 router.put(
   "/:id",
   auth,
@@ -119,8 +51,7 @@ router.put(
     const { error } = validateTeam(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(400).send("Invalid user.");
+    const user = req.user;
 
     const team = await Team.findById(req.params.id);
     if (!team)
@@ -128,7 +59,7 @@ router.put(
 
     if (team.isDeleted)
       return res.status(400).send("This team is already deleted.");
-    if (!team.members.includes(req.user._id))
+    if (!team.members.includes(user._id))
       return res.status(401).send("You are NOT authorized to edit this team.");
 
     team.name = req.body.name;
@@ -148,10 +79,8 @@ router.delete(
       return res.status(404).send("The team with the given ID was not found.");
     if (team.isDeleted)
       return res.status(400).send("This team is already deleted.");
-    console.log(team.members);
-    console.log(req.user._id);
 
-    if (!team.members.some((x) => x._id == req.user._id))
+    if (!team.members.includes(req.user._id))
       return res.status(401).send("You are NOT authorized to edit this team.");
     team.isDeleted = true;
     await team.save();

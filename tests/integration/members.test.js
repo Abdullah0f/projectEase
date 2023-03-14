@@ -61,7 +61,10 @@ describe("Members", () => {
         .send(member);
     };
     afterEach = async () => {
-      await Team.findById(team._id).update({ members: [user._id] });
+      await Team.findById(team._id).update({
+        members: [user._id],
+        isDeleted: false,
+      });
     };
     it("should return 401 if requester user is not logged in", async () => {
       const res = await exec();

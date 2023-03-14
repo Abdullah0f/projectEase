@@ -71,11 +71,11 @@ describe("Teams", () => {
       const res = await exec();
       expect(res.status).toBe(401);
     });
-    it("should return 400 if no user found with id", async () => {
+    it("should return 404 if no user found with id", async () => {
       const id = new mongoose.Types.ObjectId().toHexString();
       const token = jwt.sign({ _id: id }, config.get("jwtPrivateKey"));
       const res = await exec(token);
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(404);
     });
     it("should return 400 if team name is invalid", async () => {
       const res = await exec(user.generateAuthToken(), { name: "a" });
@@ -122,7 +122,6 @@ describe("Teams", () => {
     });
     afterAll(async () => {
       await Team.deleteMany({});
-      await User.deleteMany({});
     });
 
     it("should return 401 if client is not logged in", async () => {
@@ -149,6 +148,7 @@ describe("Teams", () => {
       }).save();
       const token = user.generateAuthToken();
       const res = await exec(token, team._id);
+      await User.findByIdAndDelete(user._id);
       expect(res.status).toBe(401);
     });
     it("should return 200, update and return the team if it is valid and user is authintcated", async () => {
@@ -183,6 +183,7 @@ describe("Teams", () => {
         owner: user._id,
         members: [user._id],
       }).save();
+      await new User({});
     });
     afterAll(async () => {
       await Team.deleteMany({});
@@ -198,7 +199,7 @@ describe("Teams", () => {
       const res = await exec(token, id);
       expect(res.status).toBe(404);
     });
-    it("should return 400 if id in invalid", async () => {
+    it("should return 400 if id invalid", async () => {
       const id = "1";
       const token = user.generateAuthToken();
       const res = await exec(token, id);
@@ -212,7 +213,6 @@ describe("Teams", () => {
       }).save();
       const token = user.generateAuthToken();
       const res = await exec(token, team._id);
-      console.log(res.text);
       expect(res.status).toBe(401);
     });
     it("should return 200, delete and return the team if it is valid and user is authintcated", async () => {
