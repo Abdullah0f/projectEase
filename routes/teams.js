@@ -3,6 +3,7 @@ const { Team, validateTeam } = require("../models/team");
 const asyncMiddleware = require("../middleware/async");
 const auth = require("../middleware/auth");
 const { User } = require("../models/user");
+const isTeam = require("../middleware/isTeam");
 router.get(
   "/",
   asyncMiddleware(async (req, res) => {
@@ -13,13 +14,10 @@ router.get(
 );
 
 router.get(
-  "/:id",
+  "/:teamId",
+  isTeam,
   asyncMiddleware(async (req, res) => {
-    const team = await Team.findById(req.params.id);
-    if (!team)
-      return res.status(404).send("The team with the given ID was not found.");
-    if (team.isDeleted)
-      return res.status(400).send("This team is already deleted.");
+    const team = req.team;
     res.send(team);
   })
 );
@@ -45,20 +43,15 @@ router.post(
 );
 
 router.put(
-  "/:id",
-  auth,
+  "/:teamId",
+  [auth, isTeam],
   asyncMiddleware(async (req, res) => {
     const { error } = validateTeam(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
     const user = req.user;
+    const team = req.team;
 
-    const team = await Team.findById(req.params.id);
-    if (!team)
-      return res.status(404).send("The team with the given ID was not found.");
-
-    if (team.isDeleted)
-      return res.status(400).send("This team is already deleted.");
     if (!team.members.includes(user._id))
       return res.status(401).send("You are NOT authorized to edit this team.");
 
@@ -71,14 +64,10 @@ router.put(
 );
 
 router.delete(
-  "/:id",
-  auth,
+  "/:teamId",
+  [auth, isTeam],
   asyncMiddleware(async (req, res) => {
-    const team = await Team.findById(req.params.id);
-    if (!team)
-      return res.status(404).send("The team with the given ID was not found.");
-    if (team.isDeleted)
-      return res.status(400).send("This team is already deleted.");
+    const team = req.team;
 
     if (!team.members.includes(req.user._id))
       return res.status(401).send("You are NOT authorized to edit this team.");

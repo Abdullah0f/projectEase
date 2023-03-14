@@ -2,6 +2,7 @@ const router = require("express").Router();
 const { User, validateUser } = require("../models/user");
 const asyncMiddleware = require("../middleware/async");
 const auth = require("../middleware/auth");
+const paramUser = require("../middleware/paramUser");
 router.get(
   "/",
   asyncMiddleware(async (req, res) => {
@@ -11,11 +12,10 @@ router.get(
   })
 );
 router.get(
-  "/:id",
+  "/:userId",
+  paramUser,
   asyncMiddleware(async (req, res) => {
-    const user = await User.findById(req.params.id);
-    if (!user)
-      return res.status(404).send("The user with the given ID was not found.");
+    const user = req.paramUser;
     res.send(user);
   })
 );
@@ -37,36 +37,32 @@ router.post(
 );
 
 router.put(
-  "/:id",
+  "/:userId",
+  paramUser,
   asyncMiddleware(async (req, res) => {
     const { error } = validateUser(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      {
-        username: req.body.username,
-        name: req.body.name,
-        email: req.body.email,
-        password: req.body.password,
-        dob: req.body.dob,
-      },
-      { new: true }
-    );
-
-    if (!user)
-      return res.status(404).send("The user with the given ID was not found.");
+    const user = req.paramUser;
+    user.set({
+      username: req.body.username,
+      name: req.body.name,
+      email: req.body.email,
+      password: req.body.password,
+      dob: req.body.dob,
+    });
+    await user.save();
 
     res.send(user);
   })
 );
 
 router.delete(
-  "/:id",
+  "/:userId",
+  paramUser,
   asyncMiddleware(async (req, res) => {
-    const user = await User.findByIdAndRemove(req.params.id);
-    if (!user)
-      return res.status(404).send("The user with the given ID was not found.");
+    const user = req.paramUser;
+    await User.findByIdAndRemove(user._id);
     res.send(user);
   })
 );

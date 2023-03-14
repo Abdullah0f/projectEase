@@ -3,6 +3,9 @@ const { Team } = require("../models/team");
 const asyncMiddleware = require("../middleware/async");
 const auth = require("../middleware/auth");
 const isTeam = require("../middleware/isTeam");
+const bodyUser = require("../middleware/bodyUser");
+const paramUser = require("../middleware/paramUser");
+
 const { User } = require("../models/user");
 
 router.get(
@@ -18,11 +21,11 @@ router.get(
 );
 router.post(
   "/",
-  [auth, isTeam],
+  [auth, isTeam, bodyUser],
   asyncMiddleware(async (req, res) => {
     const team = req.team;
     const newUser = await User.findById(req.body.userId);
-    if (!newUser) return res.status(404).send("user you want to add not found");
+    if (!newUser) return res.status(404).send("user not found");
     if (team.members.includes(newUser._id))
       return res
         .status(400)
@@ -37,11 +40,10 @@ router.post(
 
 router.delete(
   "/:userId",
-  [auth, isTeam],
+  [auth, isTeam, paramUser],
   asyncMiddleware(async (req, res) => {
-    const user = await User.findById(req.params.userId);
+    const user = req.paramUser;
     const team = req.team;
-    if (!user) return res.status(404).send("user you want to delete not found");
     if (!team.members.includes(req.user._id))
       return res.status(403).send("You are NOT authorized to edit this team.");
     if (!team.members.includes(user._id))
