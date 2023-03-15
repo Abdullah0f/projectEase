@@ -149,7 +149,7 @@ describe("Teams", () => {
       const token = user.generateAuthToken();
       const res = await exec(token, team._id);
       await User.findByIdAndDelete(user._id);
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
     });
     it("should return 200, update and return the team if it is valid and user is authintcated", async () => {
       const token = user.generateAuthToken();
@@ -213,7 +213,7 @@ describe("Teams", () => {
       }).save();
       const token = user.generateAuthToken();
       const res = await exec(token, team._id);
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
     });
     it("should return 200, delete and return the team if it is valid and user is authintcated", async () => {
       const token = user.generateAuthToken();

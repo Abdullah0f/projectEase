@@ -16,14 +16,28 @@ const taskSchema = new mongoose.Schema({
     maxlength: 1024,
     default: "Task Description",
   },
-  owner: {
+  createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
-  isCompleted: {
-    type: Boolean,
-    default: false,
+  admins: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "User",
+    default: [],
+  },
+  status: {
+    type: String,
+    enum: ["todo", "in-progress", "done", "cancelled"],
+    default: "todo",
+  },
+  dueDate: {
+    type: Date,
+  },
+  priority: {
+    type: Number,
+    default: 0,
+    enum: [0, 1, 2],
   },
   isDeleted: {
     type: Boolean,
@@ -37,7 +51,41 @@ const taskSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  deletedAt: {
+    type: Date,
+  },
 });
+
+taskSchema.methods.isAdmin = function (userId) {
+  return this.admins.includes(userId);
+};
+//TODO:
+// taskSchema.methods.isMember
+
+taskSchema.methods.isOwner = function (userId) {
+  return this.createdBy === userId;
+};
+taskSchema.methods.setTask = function (task) {
+  this.name = task.name;
+  this.description = task.description;
+  this.status = task.status;
+  this.priority = task.priority;
+  this.dueDate = task.dueDate;
+};
+taskSchema.methods.addAdmin = function (userId) {
+  if (!this.isAdmin(userId)) this.admins.push(userId);
+};
+taskSchema.methods.removeAdmin = function (userId) {
+  if (this.isAdmin(userId)) {
+    const index = this.admins.indexOf(userId);
+    this.admins.splice(index, 1);
+  }
+};
+
+taskSchema.methods.deleteTask = function () {
+  this.isDeleted = true;
+  this.deletedAt = Date.now();
+};
 
 const Task = mongoose.model("Task", taskSchema);
 
@@ -49,3 +97,6 @@ function validateTask(task) {
   });
   return schema.validate(task);
 }
+
+exports.Task = Task;
+exports.validate = validateTask;

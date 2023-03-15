@@ -53,7 +53,7 @@ router.put(
     const team = req.team;
 
     if (!team.isMember(user._id))
-      return res.status(401).send("You are NOT authorized to edit this team.");
+      return res.status(403).send("You are NOT authorized to edit this team.");
 
     team.updateTeam(req.body);
     await team.save();
@@ -68,7 +68,7 @@ router.delete(
     const team = req.team;
 
     if (!team.isMember(req.user._id))
-      return res.status(401).send("You are NOT authorized to edit this team.");
+      return res.status(403).send("You are NOT authorized to edit this team.");
     team.deleteTeam();
     await team.save();
     res.send(team);
