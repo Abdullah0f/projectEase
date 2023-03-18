@@ -28,7 +28,7 @@ const taskSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["todo", "in-progress", "done", "cancelled"],
+    enum: ["todo", "In Progress", "Done", "Completed", "Cancelled"],
     default: "todo",
   },
   dueDate: {
@@ -85,6 +85,7 @@ taskSchema.methods.removeAdmin = function (userId) {
 taskSchema.methods.deleteTask = function () {
   this.isDeleted = true;
   this.deletedAt = Date.now();
+  this.status = "Cancelled";
 };
 
 const Task = mongoose.model("Task", taskSchema);
