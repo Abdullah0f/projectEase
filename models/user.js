@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Joi = require("joi");
 const jwt = require("jsonwebtoken");
 const config = require("config");
+const { Team } = require("./team");
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
@@ -40,7 +41,9 @@ userSchema.methods.generateAuthToken = function () {
   );
   return token;
 };
-
+userSchema.methods.getTeam = function () {
+  return Team.find({ members: this._id });
+};
 const User = mongoose.model("User", userSchema);
 
 function validateUser(user) {

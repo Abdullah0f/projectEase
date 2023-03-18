@@ -3,6 +3,7 @@ const { Team } = require("../models/team");
 const asyncMiddleware = require("../middleware/async");
 const auth = require("../middleware/auth");
 const isTeam = require("../middleware/isTeam");
+const inTeam = require("../middleware/inTeam");
 const bodyUser = require("../middleware/bodyUser");
 const paramUser = require("../middleware/paramUser");
 
@@ -21,7 +22,7 @@ router.get(
 );
 router.post(
   "/",
-  [auth, isTeam, bodyUser],
+  [auth, isTeam, inTeam, bodyUser],
   asyncMiddleware(async (req, res) => {
     const team = req.team;
     const newUser = await User.findById(req.body.userId);
@@ -30,8 +31,6 @@ router.post(
       return res
         .status(400)
         .send("This user is already a member of this team.");
-    if (!team.isMember(req.user._id))
-      return res.status(403).send("You are NOT authorized to edit this team.");
     team.addMember(newUser._id);
     await team.save();
     res.send(team.members);
@@ -40,12 +39,10 @@ router.post(
 
 router.delete(
   "/:userId",
-  [auth, isTeam, paramUser],
+  [auth, isTeam, inTeam, paramUser],
   asyncMiddleware(async (req, res) => {
     const user = req.paramUser;
     const team = req.team;
-    if (!team.isMember(req.user._id))
-      return res.status(403).send("You are NOT authorized to edit this team.");
     if (!team.isMember(user._id))
       return res.status(400).send("This user is not a member of this team.");
     if (team.members.length === 1)
