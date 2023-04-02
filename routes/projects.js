@@ -20,7 +20,7 @@ router.get(
   "/:projectId",
   [auth, isTeam, inTeam, paramProject],
   asyncMiddleware(async (req, res) => {
-    const project = req.paramProject;
+    const project = req.project;
     res.send(project);
   })
 );
@@ -45,7 +45,7 @@ router.put(
   asyncMiddleware(async (req, res) => {
     const { error } = validateProject(req.body);
     if (error) return res.status(400).send(error.details[0].message);
-    const project = req.paramProject;
+    const project = req.project;
     project.set(req.body);
     await project.save();
     res.send(project);
@@ -56,7 +56,7 @@ router.delete(
   "/:projectId",
   [auth, isTeam, inTeam, paramProject],
   asyncMiddleware(async (req, res) => {
-    const project = req.paramProject;
+    const project = req.project;
     project.delete();
     await project.save();
     res.send(project);
