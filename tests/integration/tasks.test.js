@@ -115,4 +115,164 @@ describe("Tasks", () => {
       expect(res.status).toBe(400);
     });
   });
+  describe("POST /tasks", () => {
+    const exec = (body) => {
+      return request(server)
+        .post("/api/teams/" + team._id + "/projects/" + project1._id + "/tasks")
+        .set("x-auth-token", user.generateAuthToken())
+        .send(body);
+    };
+    it("should return 400 if name is less than 3 characters", async () => {
+      const res = await exec({ name: "12" });
+      expect(res.status).toBe(400);
+    });
+    it("should return 400 if name is more than 50 characters", async () => {
+      const name = new Array(52).join("a");
+      const res = await exec({ name });
+      expect(res.status).toBe(400);
+    });
+
+    it("should save the task if it is valid", async () => {
+      const res = await exec({ name: "task3", description: "description3" });
+      const task = await Task.find({ name: "task3" });
+      expect(task).not.toBeNull();
+    });
+    it("should return the task if it is valid", async () => {
+      const res = await exec({ name: "task4", description: "description4" });
+      expect(res.body).toHaveProperty("_id");
+      expect(res.body).toHaveProperty("name", "task4");
+    });
+  });
+  describe("PUT /tasks/:id", () => {
+    const exec = (id, body) => {
+      return request(server)
+        .put(
+          "/api/teams/" +
+            team._id +
+            "/projects/" +
+            project1._id +
+            "/tasks/" +
+            id
+        )
+        .set("x-auth-token", user.generateAuthToken())
+        .send(body);
+    };
+    it("should return 400 if name is less than 3 characters", async () => {
+      const res = await exec(task1._id, { name: "12" });
+      expect(res.status).toBe(400);
+    });
+    it("should return 400 if name is more than 50 characters", async () => {
+      const name = new Array(52).join("a");
+      const res = await exec(task1._id, { name });
+      expect(res.status).toBe(400);
+    });
+    it("should return 400 if invalid id is passed", async () => {
+      const res = await exec("1", { name: "task3" });
+      expect(res.status).toBe(400);
+    });
+    it("should return 404 if no task with the given id exists", async () => {
+      const res = await exec(validId, { name: "task3" });
+      expect(res.status).toBe(404);
+    });
+    it("should return 404 if no project with the given id exists", async () => {
+      const res = await request(server)
+        .put(
+          "/api/teams/" +
+            team._id +
+            "/projects/" +
+            validId +
+            "/tasks/" +
+            task1._id
+        )
+        .set("x-auth-token", user.generateAuthToken())
+        .send({ name: "task3" });
+      expect(res.status).toBe(404);
+    });
+    it("should return 404 if no team with the given id exists", async () => {
+      const res = await request(server)
+        .put(
+          "/api/teams/" +
+            validId +
+            "/projects/" +
+            project1._id +
+            "/tasks/" +
+            task1._id
+        )
+        .set("x-auth-token", user.generateAuthToken())
+        .send({ name: "task3" });
+      expect(res.status).toBe(404);
+    });
+    it("should return 400 if task does not belong to this project", async () => {
+      const res = await exec(task2._id, { name: "task3" });
+      expect(res.status).toBe(400);
+    });
+    it("should update the task if input is valid", async () => {
+      const res = await exec(task1._id, { name: "task3" });
+      console.log(res.text);
+      expect(res.status).toBe(200);
+
+      const task = await Task.findById(task1._id);
+      expect(task.name).toBe("task3");
+      expect(res.body.name).toBe("task3");
+    });
+  });
+  describe("DELETE /tasks/:id", () => {
+    const exec = (id) => {
+      return request(server)
+        .delete(
+          "/api/teams/" +
+            team._id +
+            "/projects/" +
+            project1._id +
+            "/tasks/" +
+            id
+        )
+        .set("x-auth-token", user.generateAuthToken());
+    };
+    it("should return 400 if invalid id is passed", async () => {
+      const res = await exec("1");
+      expect(res.status).toBe(400);
+    });
+    it("should return 404 if no task with the given id exists", async () => {
+      const res = await exec(validId);
+      expect(res.status).toBe(404);
+    });
+    it("should return 404 if no project with the given id exists", async () => {
+      const res = await request(server)
+        .delete(
+          "/api/teams/" +
+            team._id +
+            "/projects/" +
+            validId +
+            "/tasks/" +
+            task1._id
+        )
+        .set("x-auth-token", user.generateAuthToken());
+      expect(res.status).toBe(404);
+    });
+    it("should return 404 if no team with the given id exists", async () => {
+      const res = await request(server)
+        .delete(
+          "/api/teams/" +
+            validId +
+            "/projects/" +
+            project1._id +
+            "/tasks/" +
+            task1._id
+        )
+        .set("x-auth-token", user.generateAuthToken());
+      expect(res.status).toBe(404);
+    });
+    it("should return 400 if task does not belong to this project", async () => {
+      const res = await exec(task2._id);
+      expect(res.status).toBe(400);
+    });
+    it("should delete the task if input is valid", async () => {
+      const res = await exec(task1._id);
+      expect(res.status).toBe(200);
+      const task = await Task.findById(task1._id);
+      expect(task.isDeleted).toBe(true);
+      expect(res.body).toHaveProperty("_id");
+    });
+  });
 });

@@ -99,12 +99,12 @@ const Task = mongoose.model("Task", taskSchema);
 
 function validateTask(task) {
   const schema = Joi.object({
-    name: Joi.string().min(3).max(50).default("Task Name"),
-    description: Joi.string().min(3).max(1024).default("Task Description"),
+    name: Joi.string().min(3).max(50), //.default("Task Name"),
+    description: Joi.string().min(3).max(1024), //.default("Task Description"),
     owner: Joi.objectId(),
   });
   return schema.validate(task);
 }
 
 exports.Task = Task;
-exports.validate = validateTask;
+exports.validateTask = validateTask;

@@ -50,9 +50,11 @@ router.put(
     if (error) return res.status(400).send(error.details[0].message);
     const user = req.user;
     const task = req.task;
-    if (!task.isAdmin(user._id))
-      return res.status(403).send("You are NOT authorized to edit this task.");
+    // if (!task.isAdmin(user._id))
+    //   return res.status(403).send("You are NOT authorized to edit this task.");
     task.setTask(req.body);
+    console.log(task.name);
+    console.log(req.body);
     await task.save();
     res.send(task);
   })
@@ -64,10 +66,10 @@ router.delete(
   asyncMiddleware(async (req, res) => {
     const user = req.user;
     const task = req.task;
-    if (!task.isAdmin(user._id))
-      return res
-        .status(403)
-        .send("You are NOT authorized to delete this task.");
+    // if (!task.isAdmin(user._id))
+    //   return res
+    //     .status(403)
+    //     .send("You are NOT authorized to delete this task.");
     task.deleteTask();
     await task.save();
     res.send(task);

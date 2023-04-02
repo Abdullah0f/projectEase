@@ -64,6 +64,21 @@ describe("Projects", () => {
       const res = await exec(validId);
       expect(res.status).toBe(404);
     });
+    it("should return 400 if project does not belong to team", async () => {
+      let team3 = await new Team({
+        name: "team3",
+        owner: user._id,
+        members: [user._id],
+      }).save();
+      let project3 = await new Project({
+        name: "project3",
+        description: "description3",
+        createdBy: user._id,
+        team: team3._id,
+      }).save();
+      const res = await exec(project3._id);
+      expect(res.status).toBe(400);
+    });
     it("should return a project if valid id is passed", async () => {
       const res = await exec(project1._id);
       expect(res.status).toBe(200);
