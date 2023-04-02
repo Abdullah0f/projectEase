@@ -4,15 +4,12 @@ const { Team } = require("../../models/team");
 const { Project } = require("../../models/project");
 const { Task } = require("../../models/task");
 const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken");
-const config = require("config");
 const { user: u1, user2: u2 } = require("./constants");
 let server;
 describe("Tasks", () => {
   let user;
   let user2;
   let team;
-  let team2;
   let project1;
   let project2;
   let task1;
