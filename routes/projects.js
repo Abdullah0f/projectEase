@@ -10,7 +10,8 @@ router.get(
   "/",
   [auth, isTeam, inTeam],
   asyncMiddleware(async (req, res) => {
-    const projects = await Project.find().sort("name");
+    //get projects for this team
+    const projects = await Project.find({ team: req.team._id }).sort("name");
     if (!projects.length) return res.status(404).send("No projects found.");
     res.send(projects);
   })

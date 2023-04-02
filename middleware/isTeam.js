@@ -1,8 +1,10 @@
 const { Team } = require("../models/team");
 const mongoose = require("mongoose");
 module.exports = async function (req, res, next) {
-  if (!mongoose.Types.ObjectId.isValid(req.params.teamId))
-    return res.status(400).send("invalid ID.");
+  if (!mongoose.Types.ObjectId.isValid(req.params.teamId)) {
+    console.log(req.params);
+    return res.status(400).send("invalid team ID.");
+  }
   const team = await Team.findById(req.params.teamId);
   if (!team)
     return res.status(404).send("The team with the given ID was not found.");

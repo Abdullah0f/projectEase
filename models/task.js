@@ -26,6 +26,11 @@ const taskSchema = new mongoose.Schema({
     ref: "User",
     default: [],
   },
+  project: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Project",
+    required: true,
+  },
   status: {
     type: String,
     enum: ["todo", "In Progress", "Done", "Completed", "Cancelled"],
@@ -66,11 +71,13 @@ taskSchema.methods.isOwner = function (userId) {
   return this.createdBy === userId;
 };
 taskSchema.methods.setTask = function (task) {
-  this.name = task.name;
-  this.description = task.description;
-  this.status = task.status;
-  this.priority = task.priority;
-  this.dueDate = task.dueDate;
+  this.name = task.name || this.name;
+  this.description = task.description || this.description;
+  this.status = task.status || this.status;
+  this.priority = task.priority || this.priority;
+  this.dueDate = task.dueDate || this.dueDate;
+  this.updatedAt = Date.now();
+  this.project = task.project || this.project;
 };
 taskSchema.methods.addAdmin = function (userId) {
   if (!this.isAdmin(userId)) this.admins.push(userId);
