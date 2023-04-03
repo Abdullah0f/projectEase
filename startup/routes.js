@@ -4,6 +4,7 @@ const teams = require("../routes/teams");
 const members = require("../routes/members");
 const tasks = require("../routes/tasks");
 const projects = require("../routes/projects");
+const comments = require("../routes/projectComments");
 const error = require("../middleware/error");
 const express = require("express");
 module.exports = function (app) {
@@ -14,5 +15,10 @@ module.exports = function (app) {
   app.use("/api/teams/:teamId/members", members);
   app.use("/api/teams/:teamId/projects", projects);
   app.use("/api/teams/:teamId/projects/:projectId/tasks", tasks);
+  // app.use(
+  //   "/api/teams/:teamId/projects/:projectId/tasks/:taskId/comments",
+  //   comments
+  // );
+  // app.use("/api/teams/:teamId/projects/comments", comments);
   app.use(error);
 };

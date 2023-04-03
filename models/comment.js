@@ -42,18 +42,15 @@ const commentSchema = new mongoose.Schema({
 commentSchema.methods.delete = function () {
   this.isDeleted = true;
   this.deletedAt = Date.now();
-  return this.save();
 };
 
 commentSchema.methods.restore = function () {
   this.isDeleted = false;
   this.deletedAt = undefined;
-  return this.save();
 };
 commentSchema.methods.set = function (comment) {
   this.text = comment.text || this.text;
   this.updatedAt = Date.now();
-  return this.save();
 };
 
 const Comment = mongoose.model("Comment", commentSchema);
