@@ -12,7 +12,6 @@ router.get(
   "/",
   [auth, isTeam, inTeam, paramProject],
   asyncMiddleware(async (req, res) => {
-    // get tasks for this project
     const comments = await Comment.find({ project: req.project._id }).sort(
       "name"
     );
@@ -43,7 +42,7 @@ router.post(
       createdBy: createdBy,
       project: project._id,
     });
-    comment.setComment(req.body);
+    comment.set(req.body);
     await comment.save();
     res.send(comment);
   })
@@ -58,7 +57,7 @@ router.put(
     if (error) return res.status(400).send(error.details[0].message);
     const user = req.user;
     const comment = req.comment;
-    comment.setComment(req.body);
+    comment.set(req.body);
     await comment.save();
     res.send(comment);
   })

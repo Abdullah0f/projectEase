@@ -5,7 +5,7 @@ const commentSchema = new mongoose.Schema({
   text: {
     type: String,
     required: true,
-    minlength: 3,
+    minlength: 1,
     maxlength: 1024,
     default: "Comment Text",
   },
@@ -57,7 +57,7 @@ const Comment = mongoose.model("Comment", commentSchema);
 
 function validateComment(comment) {
   const schema = Joi.object({
-    text: Joi.string().min(3).max(1024).required(),
+    text: Joi.string().min(1).max(1024).required(),
     task: Joi.objectId(),
     project: Joi.objectId(),
   });
