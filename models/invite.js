@@ -19,6 +19,11 @@ const inviteSchema = new mongoose.Schema({
     required: true,
     default: Date.now,
   },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
   status: {
     type: String,
     required: true,
