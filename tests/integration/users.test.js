@@ -117,17 +117,18 @@ describe("Users", () => {
       });
       expect(res.status).toBe(400);
     });
+    it("should return the user with jwt as header if it is valid", async () => {
+      const res = await exec();
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("_id");
+      expect(res.body).toHaveProperty("username", "abc");
+      expect(res.header).toHaveProperty("x-auth-token");
+    });
     it("should save the user if it is valid", async () => {
       await exec();
       const user = await User.findOne({ username: "abc" });
       expect(user).not.toBeNull();
       expect(user).toHaveProperty("username", "abc");
-    });
-    it("should return the user with jwt as header if it is valid", async () => {
-      const res = await exec();
-      expect(res.body).toHaveProperty("_id");
-      expect(res.body).toHaveProperty("username", "abc");
-      expect(res.header).toHaveProperty("x-auth-token");
     });
   });
   describe("PUT /users/:id", () => {
@@ -182,7 +183,8 @@ describe("Users", () => {
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("username", "abc");
       user = await User.findById(user._id);
-      expect(user).toBeNull();
+      expect(user.isDeleted).toBe(true);
+      expect(user.deletedAt).not.toBeNull();
     });
   });
 });

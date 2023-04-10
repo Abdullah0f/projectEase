@@ -1,5 +1,6 @@
 const { User } = require("../../models/user");
 const request = require("supertest");
+const bcrypt = require("bcrypt");
 let server;
 describe("api/auth", () => {
   beforeAll(() => {
@@ -14,7 +15,7 @@ describe("api/auth", () => {
       new User({
         username: "cba",
         email: "cba@cba.com",
-        password: "12345",
+        password: await bcrypt.hash("12345", 10),
       }).save();
     });
     function exec(user) {
@@ -46,12 +47,12 @@ describe("api/auth", () => {
       });
       expect(res.status).toBe(400);
     });
-    it("should return 400 if password is incorrect", async () => {
+    it("should return 401 if password is incorrect", async () => {
       const res = await exec({
         username: "cba",
         password: "123456",
       });
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(401);
     });
     it("should return 200 if username and password are correct", async () => {
       const res = await exec({

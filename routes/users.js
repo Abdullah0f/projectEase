@@ -1,13 +1,17 @@
 const router = require("express").Router();
 const { User, validateUser } = require("../models/user");
 const asyncMiddleware = require("../middleware/async");
-const auth = require("../middleware/auth");
+const bcrypt = require("bcrypt");
 const paramUser = require("../middleware/paramUser");
 router.get(
   "/",
   asyncMiddleware(async (req, res) => {
     const users = await User.find().sort("name");
     if (!users.length) return res.status(404).send("No users found.");
+    // delete sensitive data;
+    users.forEach((user) => {
+      delete user.password;
+    });
     res.send(users);
   })
 );
@@ -16,6 +20,8 @@ router.get(
   paramUser,
   asyncMiddleware(async (req, res) => {
     const user = req.paramUser;
+    // delete sensitive data;
+    delete user.password;
     res.send(user);
   })
 );
@@ -24,6 +30,10 @@ router.post(
   asyncMiddleware(async (req, res) => {
     const { error } = validateUser(req.body);
     if (error) return res.status(400).send(error.details[0].message);
+
+    const salt = await bcrypt.genSalt(10);
+    req.body.password = await bcrypt.hash(req.body.password, salt);
+
     const user = new User({
       username: req.body.username,
       name: req.body.name,
@@ -31,7 +41,10 @@ router.post(
       password: req.body.password,
       dob: req.body.dob,
     });
+
     await user.save();
+    // delete sensitive data;
+    delete user.password;
     res.set("x-auth-token", user.generateAuthToken()).send(user);
   })
 );
@@ -62,7 +75,8 @@ router.delete(
   paramUser,
   asyncMiddleware(async (req, res) => {
     const user = req.paramUser;
-    await User.findByIdAndRemove(user._id);
+    user.delete();
+    await user.save();
     res.send(user);
   })
 );

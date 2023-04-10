@@ -3,7 +3,7 @@ const { Team, validateTeam } = require("../models/team");
 const asyncMiddleware = require("../middleware/async");
 const auth = require("../middleware/auth");
 const { User } = require("../models/user");
-const isTeam = require("../middleware/isTeam");
+const paramTeam = require("../middleware/paramTeam");
 const inTeam = require("../middleware/inTeam");
 router.get(
   "/",
@@ -16,7 +16,7 @@ router.get(
 
 router.get(
   "/:teamId",
-  isTeam,
+  paramTeam,
   asyncMiddleware(async (req, res) => {
     const team = req.team;
     res.send(team);
@@ -44,7 +44,7 @@ router.post(
 
 router.put(
   "/:teamId",
-  [auth, isTeam, inTeam],
+  [auth, paramTeam, inTeam],
   asyncMiddleware(async (req, res) => {
     const { error } = validateTeam(req.body);
     if (error) return res.status(400).send(error.details[0].message);
@@ -64,7 +64,7 @@ router.put(
 
 router.delete(
   "/:teamId",
-  [auth, isTeam, inTeam],
+  [auth, paramTeam, inTeam],
   asyncMiddleware(async (req, res) => {
     const team = req.team;
 

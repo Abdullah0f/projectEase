@@ -5,13 +5,13 @@ const auth = require("../middleware/auth");
 const paramProject = require("../middleware/paramProject.js");
 const paramTask = require("../middleware/paramTask.js");
 const paramComment = require("../middleware/paramComment.js");
-const isTeam = require("../middleware/isTeam");
+const paramTeam = require("../middleware/paramTeam");
 const inTeam = require("../middleware/inTeam");
 
 // api/teams/:teamId/projects/:projectId/tasks/:taskId/comments
 router.get(
   "/",
-  [auth, isTeam, inTeam, paramProject, paramTask],
+  [auth, paramTeam, inTeam, paramProject, paramTask],
   asyncMiddleware(async (req, res) => {
     // get tasks for this project
     const comments = await Comment.find({ task: req.task._id }).sort("name");
@@ -22,7 +22,7 @@ router.get(
 // api/teams/:teamId/projects/:projectId/tasks/:taskId/comments/:commentId
 router.get(
   "/:commentId",
-  [auth, isTeam, inTeam, paramProject, paramTask, paramComment],
+  [auth, paramTeam, inTeam, paramProject, paramTask, paramComment],
   asyncMiddleware(async (req, res) => {
     const comment = req.comment;
     res.send(comment);
@@ -32,7 +32,7 @@ router.get(
 // api/teams/:teamId/projects/:projectId/tasks/:taskId/comments
 router.post(
   "/",
-  [auth, isTeam, inTeam, paramProject, paramTask],
+  [auth, paramTeam, inTeam, paramProject, paramTask],
   asyncMiddleware(async (req, res) => {
     const { error } = validateComment(req.body);
     if (error) return res.status(400).send(error.details[0].message);
@@ -51,7 +51,7 @@ router.post(
 // api/teams/:teamId/projects/:projectId/tasks/:taskId/comments/:commentId
 router.put(
   "/:commentId",
-  [auth, isTeam, inTeam, paramProject, paramTask, paramComment],
+  [auth, paramTeam, inTeam, paramProject, paramTask, paramComment],
   asyncMiddleware(async (req, res) => {
     const { error } = validateComment(req.body);
     if (error) return res.status(400).send(error.details[0].message);
@@ -65,7 +65,7 @@ router.put(
 // api/teams/:teamId/projects/:projectId/tasks/:taskId/comments/:commentId
 router.delete(
   "/:commentId",
-  [auth, isTeam, inTeam, paramProject, paramTask, paramComment],
+  [auth, paramTeam, inTeam, paramProject, paramTask, paramComment],
   asyncMiddleware(async (req, res) => {
     const comment = req.comment;
     comment.remove();

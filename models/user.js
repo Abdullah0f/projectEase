@@ -33,6 +33,19 @@ const userSchema = new mongoose.Schema({
     type: Date,
     // required: true
   },
+  isDeleted: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+  deletedAt: {
+    type: Date,
+  },
+  createdAt: {
+    type: Date,
+    required: true,
+    default: Date.now,
+  },
 });
 userSchema.methods.generateAuthToken = function () {
   const token = jwt.sign(
@@ -43,6 +56,18 @@ userSchema.methods.generateAuthToken = function () {
 };
 userSchema.methods.getTeam = function () {
   return Team.find({ members: this._id });
+};
+userSchema.methods.set = function (user) {
+  this.username = user.username || this.username;
+  this.name = user.name || this.name;
+  this.email = user.email || this.email;
+  this.password = user.password || this.password;
+  this.dob = user.dob || this.dob;
+};
+
+userSchema.methods.delete = function () {
+  this.isDeleted = true;
+  this.deletedAt = Date.now();
 };
 const User = mongoose.model("User", userSchema);
 
