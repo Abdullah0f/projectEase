@@ -3,14 +3,14 @@ const { Invite, validateInvite } = require("../models/invite");
 const { User } = require("../models/user");
 const asyncMiddleware = require("../middleware/async");
 const auth = require("../middleware/auth");
-const isTeam = require("../middleware/isTeam");
+const paramTeam = require("../middleware/paramTeam");
 const inTeam = require("../middleware/inTeam");
 const paramInvite = require("../middleware/paramInvite");
 
 // api/teams/:teamId/invites
 router.get(
   "/",
-  [auth, isTeam, inTeam],
+  [auth, paramTeam, inTeam],
   asyncMiddleware(async (req, res) => {
     const invites = await Invite.find({ team: req.team._id }).sort("name");
     res.send(invites);
@@ -20,7 +20,7 @@ router.get(
 // api/teams/:teamId/invites/:inviteId
 router.get(
   "/:inviteId",
-  [auth, isTeam, inTeam, paramInvite],
+  [auth, paramTeam, inTeam, paramInvite],
   asyncMiddleware(async (req, res) => {
     const invite = req.invite;
     res.send(invite);
@@ -30,7 +30,7 @@ router.get(
 // api/teams/:teamId/invites
 router.post(
   "/",
-  [auth, isTeam, inTeam],
+  [auth, paramTeam, inTeam],
   asyncMiddleware(async (req, res) => {
     const { error } = validateInvite(req.body);
     if (error) return res.status(400).send(error.details[0].message);
@@ -60,7 +60,7 @@ router.post(
 // api/teams/:teamId/invites/:inviteId
 router.post(
   "/:inviteId",
-  [auth, isTeam, inTeam, paramInvite],
+  [auth, paramTeam, inTeam, paramInvite],
   asyncMiddleware(async (req, res) => {
     switch (req.body.status) {
       case "Accepted":
@@ -86,7 +86,7 @@ router.post(
 // api/teams/:teamId/invites/:inviteId
 router.delete(
   "/:inviteId",
-  [auth, isTeam, inTeam, paramInvite],
+  [auth, paramTeam, inTeam, paramInvite],
   asyncMiddleware(async (req, res) => {
     await req.invite.delete();
     res.send(req.invite);

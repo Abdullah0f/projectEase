@@ -4,13 +4,13 @@ const asyncMiddleware = require("../middleware/async");
 const auth = require("../middleware/auth");
 const paramProject = require("../middleware/paramProject.js");
 const paramComment = require("../middleware/paramComment.js");
-const isTeam = require("../middleware/isTeam");
+const paramTeam = require("../middleware/paramTeam");
 const inTeam = require("../middleware/inTeam");
 
 // api/teams/:teamId/projects/:projectId/comments
 router.get(
   "/",
-  [auth, isTeam, inTeam, paramProject],
+  [auth, paramTeam, inTeam, paramProject],
   asyncMiddleware(async (req, res) => {
     const comments = await Comment.find({ project: req.project._id }).sort(
       "name"
@@ -22,7 +22,7 @@ router.get(
 // api/teams/:teamId/projects/:projectId/comments/:commentId
 router.get(
   "/:commentId",
-  [auth, isTeam, inTeam, paramProject, paramComment],
+  [auth, paramTeam, inTeam, paramProject, paramComment],
   asyncMiddleware(async (req, res) => {
     const comment = req.comment;
     res.send(comment);
@@ -32,7 +32,7 @@ router.get(
 // api/teams/:teamId/projects/:projectId/comments
 router.post(
   "/",
-  [auth, isTeam, inTeam, paramProject],
+  [auth, paramTeam, inTeam, paramProject],
   asyncMiddleware(async (req, res) => {
     const { error } = validateComment(req.body);
     if (error) return res.status(400).send(error.details[0].message);
@@ -51,7 +51,7 @@ router.post(
 // api/teams/:teamId/projects/:projectId/comments/:commentId
 router.put(
   "/:commentId",
-  [auth, isTeam, inTeam, paramProject, paramComment],
+  [auth, paramTeam, inTeam, paramProject, paramComment],
   asyncMiddleware(async (req, res) => {
     const { error } = validateComment(req.body);
     if (error) return res.status(400).send(error.details[0].message);
@@ -66,7 +66,7 @@ router.put(
 // api/teams/:teamId/projects/:projectId/comments/:commentId
 router.delete(
   "/:commentId",
-  [auth, isTeam, inTeam, paramProject, paramComment],
+  [auth, paramTeam, inTeam, paramProject, paramComment],
   asyncMiddleware(async (req, res) => {
     const comment = req.comment;
     comment.remove();

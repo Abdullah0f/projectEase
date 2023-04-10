@@ -2,7 +2,7 @@ const router = require("express").Router({ mergeParams: true });
 const { Team } = require("../models/team");
 const asyncMiddleware = require("../middleware/async");
 const auth = require("../middleware/auth");
-const isTeam = require("../middleware/isTeam");
+const paramTeam = require("../middleware/paramTeam");
 const inTeam = require("../middleware/inTeam");
 const bodyUser = require("../middleware/bodyUser");
 const paramUser = require("../middleware/paramUser");
@@ -11,7 +11,7 @@ const { User } = require("../models/user");
 
 router.get(
   "/",
-  [isTeam],
+  [paramTeam],
   asyncMiddleware(async (req, res) => {
     const team = req.team;
     const members = await User.find({ _id: { $in: team.members } });
@@ -22,7 +22,7 @@ router.get(
 );
 router.post(
   "/",
-  [auth, isTeam, inTeam, bodyUser],
+  [auth, paramTeam, inTeam, bodyUser],
   asyncMiddleware(async (req, res) => {
     const team = req.team;
     const newUser = await User.findById(req.body.userId);
@@ -39,7 +39,7 @@ router.post(
 
 router.delete(
   "/:userId",
-  [auth, isTeam, inTeam, paramUser],
+  [auth, paramTeam, inTeam, paramUser],
   asyncMiddleware(async (req, res) => {
     const user = req.paramUser;
     const team = req.team;

@@ -4,12 +4,12 @@ const asyncMiddleware = require("../middleware/async");
 const auth = require("../middleware/auth");
 const paramTask = require("../middleware/paramTask.js");
 const paramProject = require("../middleware/paramProject.js");
-const isTeam = require("../middleware/isTeam");
+const paramTeam = require("../middleware/paramTeam");
 const inTeam = require("../middleware/inTeam");
 
 router.get(
   "/",
-  [auth, isTeam, inTeam, paramProject],
+  [auth, paramTeam, inTeam, paramProject],
   asyncMiddleware(async (req, res) => {
     // get tasks for this project
     const tasks = await Task.find({ project: req.project._id }).sort("name");
@@ -20,7 +20,7 @@ router.get(
 
 router.get(
   "/:taskId",
-  [auth, isTeam, inTeam, paramProject, paramTask],
+  [auth, paramTeam, inTeam, paramProject, paramTask],
   asyncMiddleware(async (req, res) => {
     const task = req.task;
     res.send(task);
@@ -29,7 +29,7 @@ router.get(
 
 router.post(
   "/",
-  [auth, isTeam, inTeam, paramProject],
+  [auth, paramTeam, inTeam, paramProject],
   asyncMiddleware(async (req, res) => {
     const { error } = validateTask(req.body);
     if (error) return res.status(400).send(error.details[0].message);
@@ -44,7 +44,7 @@ router.post(
 
 router.put(
   "/:taskId",
-  [auth, isTeam, inTeam, paramProject, paramTask],
+  [auth, paramTeam, inTeam, paramProject, paramTask],
   asyncMiddleware(async (req, res) => {
     const { error } = validateTask(req.body);
     if (error) return res.status(400).send(error.details[0].message);
@@ -62,7 +62,7 @@ router.put(
 
 router.delete(
   "/:taskId",
-  [auth, isTeam, inTeam, paramProject, paramTask],
+  [auth, paramTeam, inTeam, paramProject, paramTask],
   asyncMiddleware(async (req, res) => {
     const user = req.user;
     const task = req.task;

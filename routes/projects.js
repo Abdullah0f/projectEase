@@ -2,13 +2,13 @@ const router = require("express").Router({ mergeParams: true });
 const { Project, validateProject } = require("../models/project");
 const asyncMiddleware = require("../middleware/async");
 const auth = require("../middleware/auth");
-const isTeam = require("../middleware/isTeam");
+const paramTeam = require("../middleware/paramTeam");
 const inTeam = require("../middleware/inTeam");
 const paramProject = require("../middleware/paramProject");
 
 router.get(
   "/",
-  [auth, isTeam, inTeam],
+  [auth, paramTeam, inTeam],
   asyncMiddleware(async (req, res) => {
     //get projects for this team
     const projects = await Project.find({ team: req.team._id }).sort("name");
@@ -19,7 +19,7 @@ router.get(
 
 router.get(
   "/:projectId",
-  [auth, isTeam, inTeam, paramProject],
+  [auth, paramTeam, inTeam, paramProject],
   asyncMiddleware(async (req, res) => {
     const project = req.project;
     res.send(project);
@@ -28,7 +28,7 @@ router.get(
 
 router.post(
   "/",
-  [auth, isTeam, inTeam],
+  [auth, paramTeam, inTeam],
   asyncMiddleware(async (req, res) => {
     const { error } = validateProject(req.body);
     if (error) return res.status(400).send(error.details[0].message);
@@ -42,7 +42,7 @@ router.post(
 
 router.put(
   "/:projectId",
-  [auth, isTeam, inTeam, paramProject],
+  [auth, paramTeam, inTeam, paramProject],
   asyncMiddleware(async (req, res) => {
     const { error } = validateProject(req.body);
     if (error) return res.status(400).send(error.details[0].message);
@@ -55,7 +55,7 @@ router.put(
 
 router.delete(
   "/:projectId",
-  [auth, isTeam, inTeam, paramProject],
+  [auth, paramTeam, inTeam, paramProject],
   asyncMiddleware(async (req, res) => {
     const project = req.project;
     project.delete();
