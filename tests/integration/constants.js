@@ -8,3 +8,9 @@ exports.user2 = {
   email: "abc2@example.com",
   password: "12345",
 };
+
+exports.user3 = {
+  username: "abc3",
+  email: "abc3@example.com",
+  password: "12345",
+};

@@ -1,5 +1,6 @@
 const router = require("express").Router({ mergeParams: true });
 const { Invite, validateInvite } = require("../models/invite");
+const { User } = require("../models/user");
 const asyncMiddleware = require("../middleware/async");
 const auth = require("../middleware/auth");
 const isTeam = require("../middleware/isTeam");
@@ -19,7 +20,7 @@ router.get(
 // api/teams/:teamId/invites/:inviteId
 router.get(
   "/:inviteId",
-  [auth, isTeam, inTeam],
+  [auth, isTeam, inTeam, paramInvite],
   asyncMiddleware(async (req, res) => {
     const invite = req.invite;
     res.send(invite);
@@ -36,6 +37,16 @@ router.post(
     const createdBy = req.user._id;
     const team = req.team;
     const email = req.body.email;
+    //find user with this email
+    const invited = await User.findOne({ email: email });
+    console.log("invited", invited);
+    if (!invited) return res.status(400).send("no user with this email");
+    if (team.isMember(invited._id))
+      return res.status(400).send("User is already a member of this team");
+    if (await Invite.isInvited(invited.email, team._id))
+      return res.status(400).send("User is already invited to this team");
+
+    console.log("invite", email);
     const invite = new Invite({
       createdBy: createdBy,
       team: team._id,
@@ -53,22 +64,21 @@ router.post(
   asyncMiddleware(async (req, res) => {
     switch (req.body.status) {
       case "Accepted":
-        req.Invite.accept();
+        await req.invite.accept();
         break;
       case "Declined":
-        req.Invite.decline();
+        await req.invite.decline();
         break;
-      case "Cancelled":
-        req.Invite.delete();
+      case "Deleted":
+        await req.invite.delete();
         break;
       default:
         return res
           .status(400)
           .send(
-            "Status is required and must be Accepted, Declined or Cancelled"
+            "Status is required and must be Accepted, Declined or Deleted."
           );
     }
-    await req.invite.save();
     res.send(req.Invite);
   })
 );

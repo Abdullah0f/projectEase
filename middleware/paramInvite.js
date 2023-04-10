@@ -13,12 +13,12 @@ module.exports = async function (req, res, next) {
   if (paramInvite.team.toString() !== req.team._id.toString())
     return res.status(400).send("This invite does not belong to this team.");
 
-  if (paramInvite.email !== req.user.email)
-    return res.status(400).send("This invite does not belong to you.");
+  // if (paramInvite.email !== req.user.email)
+  //   return res.status(400).send("This invite does not belong to you.");
 
   if (paramInvite.isDeleted)
     return res.status(400).send("This invite is already deleted.");
 
-  req.invite = paramTask;
+  req.invite = paramInvite;
   next();
 };

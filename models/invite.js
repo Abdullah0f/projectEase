@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const Joi = require("joi");
+const { Team } = require("./team");
+const { User } = require("./user");
 
 const inviteSchema = new mongoose.Schema({
   email: {
@@ -27,7 +29,7 @@ const inviteSchema = new mongoose.Schema({
   status: {
     type: String,
     required: true,
-    enum: ["Pending", "Accepted", "Declined", "Cancelled"],
+    enum: ["Pending", "Accepted", "Declined", "Deleted"],
     default: "Pending",
   },
   isDeleted: {
@@ -40,28 +42,51 @@ const inviteSchema = new mongoose.Schema({
   },
 });
 
-inviteSchema.methods.accept = function () {
+inviteSchema.methods.accept = async function () {
+  //create transaction
+  const user = await User.findOne({ email: this.email });
+  const team = await Team.findById(this.team);
+  team.addMember(user);
+  await team.save();
   this.status = "Accepted";
   this.isDeleted = true;
   this.deletedAt = Date.now();
+  await this.save();
 };
 
-inviteSchema.methods.decline = function () {
+inviteSchema.methods.decline = async function () {
   this.status = "Declined";
   this.isDeleted = true;
   this.deletedAt = Date.now();
+  await this.save();
 };
-inviteSchema.methods.delete = function () {
-  this.status = "Cancelled";
+inviteSchema.methods.delete = async function () {
+  this.status = "Deleted";
   this.isDeleted = true;
   this.deletedAt = Date.now();
+  await this.save();
 };
+inviteSchema.methods.restore = async function () {
+  this.status = "Pending";
+  this.isDeleted = false;
+  this.deletedAt = null;
+  await this.save();
+};
+//create static method to search for invite by email and team
+inviteSchema.statics.findByEmailAndTeam = function (email, team) {
+  return this.findOne({ email: email, team: team });
+};
+
+inviteSchema.statics.isInvited = async function (email, team) {
+  const invite = await this.findByEmailAndTeam(email, team);
+  return invite ? true : false;
+};
+
 const Invite = mongoose.model("Invite", inviteSchema);
 
 function validateInvite(invite) {
   const schema = Joi.object({
     email: Joi.string().min(5).max(255).required().email(),
-    team: Joi.objectId().required(),
   });
   return schema.validate(invite);
 }
