@@ -29,6 +29,24 @@ describe("Users", () => {
       expect(res.body.length).toBe(2);
       expect(res.body.some((u) => u.username === "abc")).toBeTruthy();
       expect(res.body.some((u) => u.username === "abcd")).toBeTruthy();
+      expect(res.body[0].password).toBeFalsy();
+    });
+    it("should paginate users", async () => {
+      await new User({
+        username: "abc",
+        email: "abc@abc.com",
+        password: "12345",
+      }).save();
+      await new User({
+        username: "abcd",
+        email: "abcd@abc.com",
+        password: "12345",
+      }).save();
+      const res = await request(server).get("/api/users?page=1&limit=1");
+      expect(res.status).toBe(200);
+      expect(res.body.length).toBe(1);
+      expect(res.body.some((u) => u.username === "abc")).toBeTruthy();
+      expect(res.body.some((u) => u.username === "abcd")).toBeFalsy();
     });
     it("should return empty array if no users are found", async () => {
       const res = await request(server).get("/api/users");
@@ -47,6 +65,7 @@ describe("Users", () => {
       const res = await request(server).get("/api/users/" + user._id);
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("username", user.username);
+      expect(res.body.password).toBeFalsy();
     });
     it("should return 400 if invalid id is passed", async () => {
       const res = await request(server).get("/api/users/1");

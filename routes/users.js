@@ -6,16 +6,14 @@ const paramUser = require("../middleware/paramUser");
 router.get(
   "/",
   asyncMiddleware(async (req, res) => {
-    let users = await User.find().sort("name");
-    // filter deleted users
-    users = users.filter((user) => {
-      if (user.isDeleted) return false;
-      else {
-        //delete sensitive data
-        delete user.password;
-        return true;
-      }
-    });
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.limit) || 10;
+
+    const users = await User.find({ isDeleted: false })
+      .select("-password")
+      .skip((page - 1) * pageSize)
+      .limit(pageSize)
+      .sort("name");
     res.send(users);
   })
 );
@@ -25,7 +23,7 @@ router.get(
   asyncMiddleware(async (req, res) => {
     const user = req.paramUser;
     // delete sensitive data;
-    delete user.password;
+    user.password = undefined;
     res.send(user);
   })
 );
