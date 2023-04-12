@@ -82,6 +82,13 @@ describe("Tasks", () => {
       expect(res.body.some((t) => t.name === "task1")).toBeTruthy();
       expect(res.body.some((t) => t.name === "task2")).toBeFalsy();
     });
+    it("should paginate results", async () => {
+      const res = await exec().query({ page: 3, limit: 1 });
+      expect(res.status).toBe(200);
+      expect(res.body.length).toBe(0);
+      expect(res.body.some((t) => t.name === "task1")).toBeFalsy();
+      expect(res.body.some((t) => t.name === "task2")).toBeFalsy();
+    });
     it("should return 400 if invalid id is passed", async () => {
       const res = await exec("1");
       expect(res.status).toBe(400);

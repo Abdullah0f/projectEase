@@ -73,8 +73,8 @@ describe("taskComments", () => {
   });
 
   describe("GET /api/taskComments", () => {
-    const exec = async (id) => {
-      return await request(server)
+    const exec = (id) => {
+      return request(server)
         .get(
           "/api/teams/" +
             team._id +
@@ -89,10 +89,16 @@ describe("taskComments", () => {
     };
     it("should return 200 and all comments", async () => {
       const res = await exec();
-      console.log(res.text);
       expect(res.status).toBe(200);
       expect(res.body.length).toBe(1);
-      expect(res.body.some((p) => p.name === taskComment1.name)).toBeTruthy();
+      expect(res.body.some((c) => c.name === taskComment1.name)).toBeTruthy();
+    });
+    it("should paginate results", async () => {
+      const res = await exec().query({ page: 2, limit: 1 });
+      expect(res.status).toBe(200);
+      expect(res.body.length).toBe(0);
+      expect(res.body.some((c) => c.name === taskComment1.name)).toBeFalsy();
+      expect(res.body.some((c) => c.name === taskComment1.name)).toBeFalsy();
     });
     it("should return 400 if invalid id is passed", async () => {
       const res = await exec("1");

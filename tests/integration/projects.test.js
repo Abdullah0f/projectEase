@@ -56,6 +56,13 @@ describe("Projects", () => {
       expect(res.body.some((t) => t.name === "project1")).toBeTruthy();
       expect(res.body.some((t) => t.name === "project2")).toBeTruthy();
     });
+    it("should paginate projects", async () => {
+      const res = await exec().query({ page: 1, limit: 1 });
+      expect(res.status).toBe(200);
+      expect(res.body.length).toBe(1);
+      expect(res.body.some((t) => t.name === "project1")).toBeTruthy();
+      expect(res.body.some((t) => t.name === "project2")).toBeFalsy();
+    });
     it("should return 400 if invalid id is passed", async () => {
       const res = await exec("1");
       expect(res.status).toBe(400);

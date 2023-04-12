@@ -57,8 +57,8 @@ describe("projectComments", () => {
   });
 
   describe("GET /api/projectComments", () => {
-    const exec = async (id) => {
-      return await request(server)
+    const exec = (id) => {
+      return request(server)
         .get(
           "/api/teams/" +
             team._id +
@@ -78,6 +78,12 @@ describe("projectComments", () => {
         res.body.some((p) => p.name === projectComment1.name)
       ).toBeTruthy();
     });
+    it("should paginate comments", async () => {
+      const res = await exec().query({ page: 2, pageSize: 1 });
+      expect(res.status).toBe(200);
+      expect(res.body.length).toBe(0);
+    });
+
     it("should return 400 if invalid id is passed", async () => {
       const res = await exec("1");
       expect(res.status).toBe(400);

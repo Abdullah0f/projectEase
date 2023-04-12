@@ -49,7 +49,7 @@ describe("Tasks", () => {
     await server.close();
   });
   describe("GET /api/teams/:teamId/invites", () => {
-    const exec = async (id, u = user) => {
+    const exec = (id, u = user) => {
       return request(server)
         .get("/api/teams/" + team._id + "/invites" + (id ? "/" + id : ""))
         .set("x-auth-token", u.generateAuthToken())
@@ -60,6 +60,11 @@ describe("Tasks", () => {
       expect(res.status).toBe(200);
       expect(res.body.length).toBe(1);
       expect(res.body.some((i) => i.email === invite1.email)).toBeTruthy();
+    });
+    it("should paginate invites", async () => {
+      const res = await exec().query({ page: 2, limit: 1 });
+      expect(res.status).toBe(200);
+      expect(res.body.length).toBe(0);
     });
     it("should return 404 if no invite for this id", async () => {
       const res = await exec(validId);

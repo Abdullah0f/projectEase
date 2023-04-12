@@ -38,6 +38,13 @@ describe("Teams", () => {
       expect(res.body.some((t) => t.name === "team1")).toBeTruthy();
       expect(res.body.some((t) => t.name === "team2")).toBeTruthy();
     });
+    it("should paginate results", async () => {
+      const res = await exec().query({ page: 1, limit: 1 });
+      expect(res.status).toBe(200);
+      expect(res.body.length).toBe(1);
+      expect(res.body.some((t) => t.name === "team1")).toBeTruthy();
+      expect(res.body.some((t) => t.name === "team2")).toBeFalsy();
+    });
     it("should return a team if valid id is passed", async () => {
       const res = await exec(validId);
       expect(res.status).toBe(200);

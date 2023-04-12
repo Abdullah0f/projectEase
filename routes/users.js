@@ -7,12 +7,12 @@ router.get(
   "/",
   asyncMiddleware(async (req, res) => {
     const page = parseInt(req.query.page) || 1;
-    const pageSize = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 10;
 
     const users = await User.find({ isDeleted: false })
       .select("-password")
-      .skip((page - 1) * pageSize)
-      .limit(pageSize)
+      .skip((page - 1) * limit)
+      .limit(limit)
       .sort("name");
     res.send(users);
   })

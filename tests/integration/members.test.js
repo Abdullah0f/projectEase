@@ -51,6 +51,11 @@ describe("Members", () => {
         res.body.some((x) => x._id === user._id.toHexString())
       ).toBeTruthy();
     });
+    it("should paginate results", async () => {
+      const res = await request(server).get(path).query({ page: 2, limit: 1 });
+      expect(res.status).toBe(200);
+      expect(res.body.length).toBe(0);
+    });
   });
   describe("POST /:id/members", () => {
     const exec = (token, member, p) => {

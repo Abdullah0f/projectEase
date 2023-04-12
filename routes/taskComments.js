@@ -13,8 +13,15 @@ router.get(
   "/",
   [auth, paramTeam, inTeam, paramProject, paramTask],
   asyncMiddleware(async (req, res) => {
-    // get tasks for this project
-    const comments = await Comment.find({ task: req.task._id }).sort("name");
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const comments = await Comment.find({
+      task: req.task._id,
+      isDeleted: false,
+    })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .sort("name");
     res.send(comments);
   })
 );

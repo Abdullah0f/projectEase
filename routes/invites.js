@@ -12,7 +12,13 @@ router.get(
   "/",
   [auth, paramTeam, inTeam],
   asyncMiddleware(async (req, res) => {
-    const invites = await Invite.find({ team: req.team._id }).sort("name");
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const invites = await Invite.find({ team: req.team._id, isDeleted: false })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .sort("email");
+
     res.send(invites);
   })
 );
