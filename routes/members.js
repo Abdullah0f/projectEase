@@ -13,10 +13,16 @@ router.get(
   "/",
   [paramTeam],
   asyncMiddleware(async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
     const team = req.team;
-    const members = await User.find({ _id: { $in: team.members } });
-    if (!members.length)
-      return res.status(404).send("No members found for this team.");
+    const members = await User.find({
+      _id: { $in: team.members },
+      isDeleted: false,
+    })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .sort("name");
     res.send(members);
   })
 );

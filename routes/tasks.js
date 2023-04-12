@@ -11,9 +11,15 @@ router.get(
   "/",
   [auth, paramTeam, inTeam, paramProject],
   asyncMiddleware(async (req, res) => {
-    // get tasks for this project
-    const tasks = await Task.find({ project: req.project._id }).sort("name");
-    if (!tasks.length) return res.status(404).send("No tasks found.");
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const tasks = await Task.find({
+      project: req.project._id,
+      isDeleted: false,
+    })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .sort("name");
     res.send(tasks);
   })
 );
@@ -53,8 +59,6 @@ router.put(
     // if (!task.isAdmin(user._id))
     //   return res.status(403).send("You are NOT authorized to edit this task.");
     task.setTask(req.body);
-    console.log(task.name);
-    console.log(req.body);
     await task.save();
     res.send(task);
   })

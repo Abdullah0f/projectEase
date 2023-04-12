@@ -10,9 +10,15 @@ router.get(
   "/",
   [auth, paramTeam, inTeam],
   asyncMiddleware(async (req, res) => {
-    //get projects for this team
-    const projects = await Project.find({ team: req.team._id }).sort("name");
-    if (!projects.length) return res.status(404).send("No projects found.");
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const projects = await Project.find({
+      team: req.team._id,
+      isDeleted: false,
+    })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .sort("name");
     res.send(projects);
   })
 );

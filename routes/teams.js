@@ -8,8 +8,13 @@ const inTeam = require("../middleware/inTeam");
 router.get(
   "/",
   asyncMiddleware(async (req, res) => {
-    const teams = await Team.find().sort("name");
-    if (!teams.length) return res.status(404).send("No teams found.");
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const teams = await Team.find({ isDeleted: false })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .sort("name");
+
     res.send(teams);
   })
 );
