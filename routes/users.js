@@ -6,11 +6,15 @@ const paramUser = require("../middleware/paramUser");
 router.get(
   "/",
   asyncMiddleware(async (req, res) => {
-    const users = await User.find().sort("name");
-    if (!users.length) return res.status(404).send("No users found.");
-    // delete sensitive data;
-    users.forEach((user) => {
-      delete user.password;
+    let users = await User.find().sort("name");
+    // filter deleted users
+    users = users.filter((user) => {
+      if (user.isDeleted) return false;
+      else {
+        //delete sensitive data
+        delete user.password;
+        return true;
+      }
     });
     res.send(users);
   })
@@ -75,7 +79,7 @@ router.delete(
   paramUser,
   asyncMiddleware(async (req, res) => {
     const user = req.paramUser;
-    user.delete();
+    user.deleteUser();
     await user.save();
     res.send(user);
   })

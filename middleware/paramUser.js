@@ -7,6 +7,7 @@ module.exports = async function (req, res, next) {
 
   if (!paramUser)
     return res.status(404).send("The user with the given ID was not found.");
+  if (paramUser.isDeleted) return res.status(404).send("This user is deleted.");
   req.paramUser = paramUser;
   next();
 };

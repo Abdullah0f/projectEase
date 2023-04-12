@@ -65,7 +65,7 @@ userSchema.methods.set = function (user) {
   this.dob = user.dob || this.dob;
 };
 
-userSchema.methods.delete = function () {
+userSchema.methods.deleteUser = function () {
   this.isDeleted = true;
   this.deletedAt = Date.now();
 };

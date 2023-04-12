@@ -30,9 +30,10 @@ describe("Users", () => {
       expect(res.body.some((u) => u.username === "abc")).toBeTruthy();
       expect(res.body.some((u) => u.username === "abcd")).toBeTruthy();
     });
-    it("should return 404 if no users are found", async () => {
+    it("should return empty array if no users are found", async () => {
       const res = await request(server).get("/api/users");
-      expect(res.status).toBe(404);
+      expect(res.status).toBe(200);
+      expect(res.body.length).toBe(0);
     });
   });
   describe("GET /users/:id", () => {
@@ -55,6 +56,18 @@ describe("Users", () => {
       const id = new mongoose.Types.ObjectId().toHexString();
       const res = await request(server).get("/api/users/" + id);
       expect(res.status).toBe(404);
+    });
+    it("should return 404 if user is deleted", async () => {
+      const user = new User({
+        username: "abc",
+        email: "abc@abc.com",
+        password: "12345",
+      });
+      user.deleteUser();
+      await user.save();
+      const res = await request(server).get("/api/users/" + user._id);
+      expect(res.status).toBe(404);
+      expect(res.text).toContain("deleted");
     });
   });
   describe("POST /users", () => {
