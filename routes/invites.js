@@ -45,7 +45,6 @@ router.post(
     const email = req.body.email;
     //find user with this email
     const invited = await User.findOne({ email: email });
-    console.log("invited", invited);
     if (!invited) return res.status(400).send("no user with this email");
     if (team.isMember(invited._id))
       return res.status(400).send("User is already a member of this team");
@@ -66,8 +65,12 @@ router.post(
 // api/teams/:teamId/invites/:inviteId
 router.post(
   "/:inviteId",
-  [auth, paramTeam, inTeam, paramInvite],
+  [auth, paramTeam, paramInvite],
   asyncMiddleware(async (req, res) => {
+    if (req.invite.email !== req.user.email)
+      return res.status(403).send("This invite does not belong to you.");
+    if (!req.invite.isValid())
+      return res.status(400).send("This invite is no longer valid.");
     switch (req.body.status) {
       case "Accepted":
         await req.invite.accept();

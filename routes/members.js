@@ -4,7 +4,6 @@ const asyncMiddleware = require("../middleware/async");
 const auth = require("../middleware/auth");
 const paramTeam = require("../middleware/paramTeam");
 const inTeam = require("../middleware/inTeam");
-const bodyUser = require("../middleware/bodyUser");
 const paramUser = require("../middleware/paramUser");
 
 const { User } = require("../models/user");
@@ -28,7 +27,7 @@ router.get(
 );
 router.post(
   "/",
-  [auth, paramTeam, inTeam, bodyUser],
+  [auth, paramTeam, inTeam],
   asyncMiddleware(async (req, res) => {
     const team = req.team;
     const newUser = await User.findById(req.body.userId);

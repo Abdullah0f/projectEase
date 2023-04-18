@@ -59,6 +59,10 @@ router.put(
     if (error) return res.status(400).send(error.details[0].message);
 
     const user = req.paramUser;
+    if (req.body.password) {
+      const salt = await bcrypt.genSalt(10);
+      req.body.password = await bcrypt.hash(req.body.password, salt);
+    }
     user.set({
       username: req.body.username,
       name: req.body.name,
@@ -77,6 +81,14 @@ router.delete(
   paramUser,
   asyncMiddleware(async (req, res) => {
     const user = req.paramUser;
+    const teams = user.getTeams();
+    if (teams.length) {
+      for (let team of teams) {
+        if (team.isOwner(user._id)) team.changeOwner();
+        else team.removeMember(user._id);
+      }
+    }
+
     user.deleteUser();
     await user.save();
     res.send(user);

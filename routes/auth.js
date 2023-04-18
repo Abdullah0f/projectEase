@@ -25,7 +25,7 @@ router.post(
       return res.status(401).send("Invalid email/username or password");
 
     const token = user.generateAuthToken();
-    res.send(token);
+    res.header("x-auth-token", token).send(token);
   })
 );
 function validate(req) {
@@ -33,7 +33,9 @@ function validate(req) {
     username: Joi.string().min(3).max(50),
     email: Joi.string().min(5).max(255),
     password: Joi.string().min(5).max(255).required(),
-  });
+  })
+    .xor("username", "email")
+    .required();
   return schema.validate(req);
 }
 module.exports = router;

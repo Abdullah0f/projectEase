@@ -54,7 +54,7 @@ userSchema.methods.generateAuthToken = function () {
   );
   return token;
 };
-userSchema.methods.getTeam = function () {
+userSchema.methods.getTeams = function () {
   return Team.find({ members: this._id });
 };
 userSchema.methods.set = function (user) {

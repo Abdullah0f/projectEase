@@ -5,7 +5,7 @@ const { Invite } = require("../../models/invite");
 const mongoose = require("mongoose");
 const { user: u1, user2: u2, user3: u3 } = require("./constants");
 let server;
-describe("Tasks", () => {
+describe("Invites", () => {
   let user;
   let user2;
   let user3;
@@ -137,10 +137,10 @@ describe("Tasks", () => {
     });
   });
   describe("POST /api/teams/:teamId/invites/:inviteId", () => {
-    const exec = async (id, status) => {
+    const exec = async (id, status, u = user2) => {
       return request(server)
         .post("/api/teams/" + team._id + "/invites/" + id)
-        .set("x-auth-token", user.generateAuthToken())
+        .set("x-auth-token", u.generateAuthToken())
         .send(status);
     };
     it("should return 404 if no invite for this id", async () => {
@@ -150,6 +150,14 @@ describe("Tasks", () => {
     it("should return 400 if invite doesnt belong to this team", async () => {
       const res = await exec(invite2._id);
       expect(res.status).toBe(400);
+    });
+    it("should return 403 if other user (even if in team) POST", async () => {
+      const res = await exec(invite1._id, { status: "Accepted" }, user);
+      expect(res.status).toBe(403);
+    });
+    it("should return 403 if other user (out of team) POST", async () => {
+      const res = await exec(invite1._id, { status: "Accepted" }, user3);
+      expect(res.status).toBe(403);
     });
     it("should return 200 and decline the invite if valid and Declined passed and don't add to team", async () => {
       const res = await exec(invite1._id, { status: "Declined" });
@@ -181,6 +189,15 @@ describe("Tasks", () => {
     it("should return 400 if status is invalid", async () => {
       const res = await exec(invite1._id, { status: "invalid" });
       expect(res.status).toBe(400);
+    });
+    it("should return 400 if invite is already answerd", async () => {
+      const res = await exec(invite1._id, { status: "Accepted" });
+      expect(res.status).toBe(200);
+      const res2 = await exec(invite1._id, { status: "Declined" });
+      expect(res2.status).toBe(400);
+      const invite = await Invite.findById(invite1._id);
+      expect(invite.status).toBe("Accepted");
+      await invite.restore();
     });
   });
 });

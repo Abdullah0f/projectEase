@@ -80,16 +80,14 @@ taskSchema.methods.setTask = function (task) {
   this.project = task.project || this.project;
 };
 taskSchema.methods.addAdmin = function (userId) {
-  if (!this.isAdmin(userId)) this.admins.push(userId);
+  this.admins.addToSet(userId);
 };
 taskSchema.methods.removeAdmin = function (userId) {
-  if (this.isAdmin(userId)) {
-    const index = this.admins.indexOf(userId);
-    this.admins.splice(index, 1);
-  }
+  this.admins.pull(userId);
 };
 
 taskSchema.methods.deleteTask = function () {
+  if (this.isDeleted) return;
   this.isDeleted = true;
   this.deletedAt = Date.now();
   this.status = "Cancelled";
@@ -99,8 +97,8 @@ const Task = mongoose.model("Task", taskSchema);
 
 function validateTask(task) {
   const schema = Joi.object({
-    name: Joi.string().min(3).max(50), //.default("Task Name"),
-    description: Joi.string().min(3).max(1024), //.default("Task Description"),
+    name: Joi.string().min(3).max(50).default("Task Name"),
+    description: Joi.string().min(3).max(1024).default("Task Description"),
     owner: Joi.objectId(),
   });
   return schema.validate(task);

@@ -73,7 +73,7 @@ projectSchema.methods.set = function (project) {
 };
 
 projectSchema.methods.addTask = function (task) {
-  this.tasks.push(task);
+  this.tasks.addToSet(task);
 };
 projectSchema.methods.removeTask = function (task) {
   this.tasks.pull(task);
@@ -84,7 +84,6 @@ function validateProject(project) {
     name: Joi.string().min(3).max(50).default("Project Name"),
     description: Joi.string().min(3).max(1024).default("Project Description"),
     createdBy: Joi.objectId(),
-    assignedTo: Joi.objectId(),
     tasks: Joi.objectId(),
     status: Joi.string()
       .valid("Not Started", "In Progress", "Completed", "Cancelled")

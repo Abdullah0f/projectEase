@@ -26,7 +26,7 @@ const teamSchema = new mongoose.Schema({
     type: [mongoose.Schema.Types.ObjectId],
     ref: "User",
     required: true,
-    default: [this.owner].length ? [this.owner] : [],
+    default: this.owner ? [this.owner] : [],
   },
   createdAt: {
     type: Date,
@@ -72,6 +72,15 @@ teamSchema.methods.updateTeam = function (team) {
   this.description = team.description;
   this.modfiedAt = Date.now();
 };
+teamSchema.methods.changeOwner = function () {
+  if (this.members.length === 1) {
+    this.deleteTeam();
+  } else {
+    this.removeMember(this.owner);
+    this.owner = this.members[0];
+  }
+};
+
 teamSchema.methods.isMember = function (user) {
   return this.members.includes(user);
 };

@@ -41,7 +41,9 @@ const inviteSchema = new mongoose.Schema({
     type: Date,
   },
 });
-
+inviteSchema.methods.isValid = function () {
+  return this.status === "Pending" && !this.isDeleted;
+};
 inviteSchema.methods.accept = async function () {
   //create transaction
   const user = await User.findOne({ email: this.email });
