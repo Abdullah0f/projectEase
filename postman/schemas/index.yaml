@@ -4,9 +4,9 @@ info:
     title: "projectEase API"
     description: "A RESTful API for managing projects and tasks"
     contact:
-        name: "Your Name"
-        email: "youremail@example.com"
-        url: "https://example.com"
+        name: "Abdullah Fahad"
+        email: "abdullah84f@gmail.com"
+        url: "https://github.com/Abdullah0f/"
 servers:
     - url: "http://localhost:3000/api"
 paths:
