@@ -1,0 +1,1418 @@
+openapi: "3.0.0"
+info:
+    version: "1.0.0"
+    title: "projectEase API"
+    description: "A RESTful API for managing projects and tasks"
+    contact:
+        name: "Your Name"
+        email: "youremail@example.com"
+        url: "https://example.com"
+servers:
+    - url: "http://localhost:3000/api"
+paths:
+    /users:
+        get:
+            tags:
+                - Users
+            summary: Get all users
+            description: Returns all users in the database.
+            parameters:
+                - $ref: "#/components/parameters/page"
+                - $ref: "#/components/parameters/limit"
+
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/User"
+                "500":
+                    description: Internal Server Error
+
+        post:
+            tags:
+                - Users
+            summary: Create a new user
+            description: Creates a new user in the database.
+            requestBody:
+                description: User object to be created
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UserRequest"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/User"
+                "400":
+                    description: Bad Request
+                "500":
+                    description: Internal Server Error
+
+    /users/{userId}:
+        get:
+            tags:
+                - Users
+            summary: Get user by ID
+            description: Returns a user by ID.
+            parameters:
+                - $ref: "#/components/parameters/userId"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/User"
+                "404":
+                    description: User not found
+                "400":
+                    description: Bad Request(invalid id)
+                "500":
+                    description: Internal Server Error
+
+        put:
+            tags:
+                - Users
+            summary: Update user by ID
+            description: Updates a user by ID.
+            parameters:
+                - $ref: "#/components/parameters/userId"
+            requestBody:
+                description: User object to be updated
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UserRequest"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/User"
+                "400":
+                    description: Bad Request
+                "404":
+                    description: User not found
+                "500":
+                    description: Internal Server Error
+
+        delete:
+            tags:
+                - Users
+            summary: Delete user by ID
+            description: Deletes a user by ID.
+            parameters:
+                - $ref: "#/components/parameters/userId"
+            security:
+                - x-auth-token: []
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/User"
+                "404":
+                    description: User not found
+                "500":
+                    description: Internal Server Error
+    /auth:
+        post:
+            tags:
+                - Auth
+            summary: Authenticate user
+            description: Authenticate user by email/username and password.
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/AuthRequest"
+            responses:
+                "200":
+                    description: OK
+                    headers:
+                        x-auth-token:
+                            schema:
+                                type: string
+                            description: Authentication token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AuthResponse"
+                "400":
+                    description: Bad request
+                "401":
+                    description: Unauthorized
+                "500":
+                    description: Internal Server Error
+    /teams:
+        get:
+            tags:
+                - Teams
+            summary: Get all teams
+            description: Get a list of all teams
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/Team"
+        post:
+            security:
+                - x-auth-token: []            
+            tags:
+                - Teams
+            summary: Create a team
+            description: Create a new team
+            requestBody:
+                description: Team object that needs to be created
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/TeamRequest"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Team"
+                "500":
+                    description: Internal Server Error
+    /teams/{teamId}:
+        parameters:
+            - $ref: "#/components/parameters/teamId"
+        get:
+            tags:
+                - Teams
+            summary: Get a team
+            description: Get a team by ID
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Team"
+        put:
+            security:
+                - x-auth-token: []            
+            tags:
+                - Teams
+            summary: Update a team
+            description: Update an existing team by ID
+            requestBody:
+                description: Team object that needs to be updated
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/TeamRequest"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Team"
+                "400":
+                    description: Bad Request
+                "401":
+                    description: No Token Provided
+                "404":
+                    description: Something not found
+        delete:
+            security:
+                - x-auth-token: []            
+            tags:
+                - Teams
+            summary: Delete a team
+            description: Delete a team by ID
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Team"
+
+    /teams/{teamId}/members:
+        get:
+            tags:
+                - Members
+            summary: Get all members of a team
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/page"
+                - $ref: "#/components/parameters/limit"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/User"
+                "404":
+                    description: Team not found
+                "500":
+                    description: Internal Server Error
+        post:
+            security:
+                - x-auth-token: []            
+            tags:
+                - Members
+            summary: Add a member to a team
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+            requestBody:
+                description: The ID of the user to add as a member of the team
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                userId:
+                                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    type: string
+                "400":
+                    description: Bad Request
+                "404":
+                    description: Team or User not found
+                "500":
+                    description: Internal Server Error
+    /teams/{teamId}/members/{userId}:
+        delete:
+            security:
+                - x-auth-token: []            
+            tags:
+                - Members
+            summary: Remove a member from a team
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/userId"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    type: string
+                "400":
+                    description: Bad Request
+                "404":
+                    description: Team or User not found, or user is not a member of the team
+                "500":
+                    description: Internal Server Error
+    /teams/{teamId}/invites:
+        get:
+            security:
+                - x-auth-token: []            
+            summary: "Get all invites for a team"
+            description: "Retrieves all the invites for a given team."
+            tags:
+                - "Invites"
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/page"
+                - $ref: "#/components/parameters/limit"
+            responses:
+                "200":
+                    description: "A list of invites for the team."
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/Invite"
+        post:
+            security:
+                - x-auth-token: []            
+            summary: "Create an invite"
+            description: "Creates a new invite to a team with a given email."
+            tags:
+                - "Invites"
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/NewInvite"
+            responses:
+                "200":
+                    description: "The newly created invite."
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Invite"
+                "400":
+                    description: "Invalid request body or email is already invited or user is already a member."
+                "401":
+                    description: "User is not authenticated."
+                "404":
+                    description: "Team not found."
+    /teams/{teamId}/invites/{inviteId}:
+        get:
+            security:
+                - x-auth-token: []            
+            summary: "Get an invite"
+            description: "Retrieves the details of an invite."
+            tags:
+                - "Invites"
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/inviteId"
+            responses:
+                "200":
+                    description: "The details of the invite."
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Invite"
+                "401":
+                    description: "User is not authenticated."
+                "403":
+                    description: "User does not own this invite or invite is no longer valid."
+                "404":
+                    description: "Team or invite not found."
+        post:
+            security:
+                - x-auth-token: []            
+            summary: "Accept, decline, or delete an invite"
+            description: "Changes the status of an invite to Accepted, Declined, or Deleted."
+            tags:
+                - "Invites"
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/inviteId"
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UpdateInvite"
+            responses:
+                "200":
+                    description: "The updated invite."
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Invite"
+                "400":
+                    description: "Invalid request body."
+                "401":
+                    description: "User is not authenticated."
+                "403":
+                    description: "User does not own this invite or invite is no longer valid."
+        delete:
+            security:
+                - x-auth-token: []            
+            tags:
+                - Invites
+            summary: Delete an invite
+            description: |
+                Deletes an invite by ID. Returns a 404 error if the invite is not found or is deleted.
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/inviteId"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Invite"
+                "404":
+                    description: The invite was not found
+    /teams/{teamId}/projects:
+        get:
+            security:
+                - x-auth-token: []            
+            tags:
+                - Projects
+            summary: Get all projects
+            description: Returns a list of all projects belonging to the authenticated user's team
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/page"
+                - $ref: "#/components/parameters/limit"
+            responses:
+                "200":
+                    description: A list of projects
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/Project"
+        post:
+            security:
+                - x-auth-token: []            
+            tags:
+                - Projects
+            summary: Create a new project
+            description: Creates a new project for the authenticated user's team
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+            requestBody:
+                description: The project object to create
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/ProjectRequest"
+            responses:
+                "200":
+                    description: The created project
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Project"
+    /teams/{teamId}/projects/{projectId}:       
+        parameters:
+            - $ref: "#/components/parameters/teamId"
+            - $ref: "#/components/parameters/projectId"
+        get:
+            security:
+                - x-auth-token: []            
+            tags:
+                - Projects
+            summary: Get a specific project
+            description: Returns the details of a specific project belonging to the authenticated user's team
+            responses:
+                "200":
+                    description: The project details
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Project"
+        put:
+            security:
+                - x-auth-token: []            
+            tags:
+                - Projects
+            summary: Update a specific project
+            description: Updates a specific project belonging to the authenticated user's team
+            requestBody:
+                description: The updated project object
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/Project"
+            responses:
+                "200":
+                    description: The updated project
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Project"
+        delete:
+            security:
+                - x-auth-token: []            
+            tags:
+                - Projects
+            summary: Delete a specific project
+            description: Deletes a specific project belonging to the authenticated user's team
+            responses:
+                "200":
+                    description: The deleted project
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Project"
+    /teams/{teamId}/projects/{projectId}/task:      
+        get:
+            security:
+                - x-auth-token: []            
+            summary: Get all tasks for a project
+            description: Returns a list of tasks for a given project. Only authenticated users who are part of the team that owns the project can access this route.
+            tags:
+                - Tasks
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/projectId"
+                - $ref: "#/components/parameters/page"
+                - $ref: "#/components/parameters/limit"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Task"
+
+        post:
+            security:
+                - x-auth-token: []                
+            summary: Create a new task for a project
+            description: Creates a new task for a given project. Only authenticated users who are part of the team that owns the project can access this route.
+            tags:
+                - Tasks
+            requestBody:
+                description: Task object that needs to be created
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/Task"
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/projectId"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Task"
+                "400":
+                    description: Bad Request
+    /teams/{teamId}/projects/{projectId}/task/{taskId}:
+        get:
+            security:
+                - x-auth-token: []            
+            summary: Get a task by ID
+            description: Returns a single task by ID. Only authenticated users who are part of the team that owns the project can access this route.
+            tags:
+                - Tasks
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/projectId"
+                - $ref: "#/components/parameters/taskId"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Task"
+                "404":
+                    description: Not Found
+        put:
+            security:
+                - x-auth-token: []            
+            summary: Update a task by ID
+            description: Updates a single task by ID. Only authenticated users who are part of the team that owns the project can access this route.
+            tags:
+                - Tasks
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/projectId"
+                - name: taskId
+                  in: path
+                  description: ID of the task to update
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                description: Task object that needs to be updated
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/Task"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Task"
+                "400":
+                    description: Bad Request
+                "403":
+                    description: Forbidden
+                "404":
+                    description: Not Found
+        delete:
+            security:
+                - x-auth-token: []            
+            summary: Delete a task by ID
+            description: Deletes a single task by ID. Only authenticated users who are part of the team that owns the project can access this route.
+            tags:
+                - Tasks
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/projectId"
+                - name: taskId
+                  in: path
+                  description: ID of the task to delete
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Task"
+                "403":
+                    description: Forbidden
+                "404":
+                    description: Not Found
+    /teams/{teamId}/projects/{projectId}/comments:
+        get:
+            security:
+                - x-auth-token: []            
+            summary: Get all comments for a project
+            description: Returns all comments for a project. Only authenticated users who are part of the team that owns the project can access this route.
+            tags:
+                - ProjectComments
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/projectId"
+                - name: page
+                  in: query
+                  description: Page number
+                  required: false
+                  schema:
+                      type: integer
+                      minimum: 1
+                - name: limit
+                  in: query
+                  description: Number of comments per page
+                  required: false
+                  schema:
+                      type: integer
+                      minimum: 1
+                      maximum: 100
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/Comment"
+                "404":
+                    description: Not Found
+
+        post:
+            security:
+                - x-auth-token: []            
+            summary: Create a new comment for a project
+            description: Creates a new comment for a project. Only authenticated users who are part of the team that owns the project can access this route.
+            tags:
+                - ProjectComments
+            requestBody:
+                description: Comment object
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/CommentRequest"
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/projectId"
+            responses:
+                "201":
+                    description: Created
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Comment"
+                "400":
+                    description: Bad Request
+
+    /teams/{teamId}/projects/{projectId}/comments/{commentId}:
+        get:
+            security:
+                - x-auth-token: []            
+            summary: Get a comment by ID
+            description: Returns a single comment by ID. Only authenticated users who are part of the team that owns the project can access this route.
+            tags:
+                - ProjectComments
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/projectId"
+                - $ref: "#/components/parameters/commentId"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Comment"
+                "404":
+                    description: Not Found
+
+        put:
+            security:
+                - x-auth-token: []            
+            summary: Update a comment by ID
+            description: Updates a single comment by ID. Only authenticated users who are the creators of the comment can access this route.
+            tags:
+                - ProjectComments
+            requestBody:
+                description: Comment object
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/CommentRequest"
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/projectId"
+                - $ref: "#/components/parameters/commentId"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Comment"
+                "400":
+                    description: Bad Request
+                "403":
+                    description: Forbidden
+        delete:
+            security:
+                - x-auth-token: []            
+            summary: Delete a comment
+            description: Deletes a comment by ID. Only authenticated users who are part of the team that owns the project can access this route.
+            tags:
+                - ProjectComments
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/projectId"
+                - $ref: "#/components/parameters/commentId"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Comment"
+                "404":
+                    description: Not Found
+    /teams/{teamId}/projects/{projectId}/task/{taskId}/comments:
+        get:
+            security:
+                - x-auth-token: []            
+            tags:
+                - TaskComments
+            summary: Get comments for a task
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/projectId"
+                - $ref: "#/components/parameters/taskId"
+                - $ref: "#/components/parameters/page"
+                - $ref: "#/components/parameters/limit"
+            responses:
+                "200":
+                    description: A list of comments
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/Comment"
+        post:
+            security:
+                - x-auth-token: []            
+            tags:
+                - TaskComments
+            summary: Create a new comment for a task
+            requestBody:
+                description: Comment object to be added to the task
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/CommentRequest"
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/projectId"
+                - $ref: "#/components/parameters/taskId"
+            responses:
+                "200":
+                    description: Successfully created a comment
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Comment"
+    /teams/{teamId}/projects/{projectId}/task/{taskId}/comments/{commentId}:
+        get:
+            security:
+                - x-auth-token: []            
+            tags:
+                - TaskComments
+            summary: Get a comment by commentId
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/projectId"
+                - $ref: "#/components/parameters/taskId"
+                - $ref: "#/components/parameters/commentId"
+            responses:
+                "200":
+                    description: A comment object
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Comment"
+        put:
+            security:
+                - x-auth-token: []            
+            tags:
+                - TaskComments
+            summary: Update a comment by commentId
+            requestBody:
+                description: Comment object to be updated
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/CommentRequest"
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/projectId"
+                - $ref: "#/components/parameters/taskId"
+                - $ref: "#/components/parameters/commentId"
+            responses:
+                "200":
+                    description: Successfully updated a comment
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Comment"
+        delete:
+            security:
+                - x-auth-token: []            
+            tags:
+                - TaskComments
+            summary: Delete a comment by commentId
+            parameters:
+                - $ref: "#/components/parameters/teamId"
+                - $ref: "#/components/parameters/projectId"
+                - $ref: "#/components/parameters/taskId"
+                - $ref: "#/components/parameters/commentId"
+            responses:
+                "200":
+                    description: Successfully deleted a comment
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Comment"
+components:
+    securitySchemes:
+        x-auth-token:
+            type: apiKey
+            name: x-auth-token
+            in: header
+    parameters:
+        userId:
+            in: path
+            name: userId
+            required: true
+            description: ID of the user to get.
+            schema:
+                type: string
+                example: "613c527b74d3c4353f8a7b19"
+
+        teamId:
+            in: path
+            name: teamId
+            required: true
+            description: The ID of the team
+            schema:
+                type: string
+                example: "613aee68be624ca35b2e2b98"
+        inviteId:
+            in: path
+            name: inviteId
+            required: true
+            description: The ID of the invite
+            schema:
+                type: string
+                example: "613c527b74d3c4353f8a7b19"
+        projectId:
+            in: path
+            name: projectId
+            description: ID of the project to manipulate
+            required: true
+            schema:
+                type: string
+                example: "613c527b74d3c4353f8a7b19"
+        taskId:
+            in: path
+            name: taskId
+            description: ID of the task to return
+            required: true
+            schema:
+                type: string
+                example: "613c527b74d3c4353f8a7b19"
+        commentId:
+            name: commentId
+            in: path
+            required: true
+            description: The ID of the comment to retrieve or delete.
+            schema:
+                type: string
+                example: "613c527b74d3c4353f8a7b19"
+
+        page:
+            in: query
+            name: page
+            required: false
+            description: The page number of the result set to return. Defaults to 1.
+            schema:
+                type: integer
+                example: 1
+        limit:
+            in: query
+            name: limit
+            required: false
+            description: The maximum number of results to return per page. Defaults to 10.
+            schema:
+                type: integer
+                example: 10
+
+    schemas:
+        User:
+            type: object
+            properties:
+                username:
+                    type: string
+                    minLength: 3
+                    maxLength: 50
+                    description: The username of the user.
+                name:
+                    type: string
+                    minLength: 3
+                    maxLength: 50
+                    description: The name of the user.
+                email:
+                    type: string
+                    minLength: 5
+                    maxLength: 255
+                    format: email
+                    description: The email address of the user.
+                password:
+                    type: string
+                    minLength: 5
+                    maxLength: 1024
+                    description: The password of the user.
+                dob:
+                    type: string
+                    format: date
+                    description: The date of birth of the user.
+                isDeleted:
+                    type: boolean
+                    default: false
+                    description: Indicates whether the user has been deleted.
+                deletedAt:
+                    type: string
+                    format: date-time
+                    description: The date and time when the user was deleted.
+                createdAt:
+                    type: string
+                    format: date-time
+                    description: The date and time when the user was created.
+                updatedAt:
+                    type: string
+                    format: date-time
+                    description: The date and time when the user was last updated.
+            required:
+                - username
+                - email
+                - password
+
+        UserRequest:
+            type: object
+            properties:
+                username:
+                    type: string
+                    minLength: 3
+                    maxLength: 50
+                    description: The username of the user.
+                name:
+                    type: string
+                    minLength: 3
+                    maxLength: 50
+                    description: The name of the user.
+                email:
+                    type: string
+                    minLength: 5
+                    maxLength: 255
+                    format: email
+                    description: The email address of the user.
+                password:
+                    type: string
+                    minLength: 5
+                    maxLength: 1024
+                    description: The password of the user.
+                dob:
+                    type: string
+                    format: date
+                    description: The date of birth of the user.
+            required:
+                - username
+                - email
+                - password
+
+        AuthRequest:
+            type: object
+            properties:
+                username:
+                    type: string
+                    minLength: 3
+                    maxLength: 50
+                email:
+                    type: string
+                    minLength: 5
+                    maxLength: 255
+                password:
+                    type: string
+                    minLength: 5
+                    maxLength: 255
+            required:
+                - password
+            oneOf:
+                - required:
+                      - username
+                - required:
+                      - email
+        AuthResponse:
+            type: object
+            properties:
+                token:
+                    type: string
+            required:
+                - token
+
+        Team:
+          type: object
+          properties:
+            _id:
+              type: string
+            name:
+              type: string
+              minLength: 3
+              maxLength: 50
+            description:
+              type: string
+              minLength: 3
+              maxLength: 1024
+            owner:
+              type: string
+              format: uuid
+            members:
+              type: array
+              items:
+                type: string
+                format: uuid
+            createdAt:
+              type: string
+              format: date-time
+            modifiedAt:
+              type: string
+              format: date-time
+            deletedAt:
+              type: string
+              format: date-time
+            isDeleted:
+              type: boolean
+          required:
+            - name
+            - description
+            - owner
+            - members
+        TeamRequest:
+          type: object
+          properties:
+            name:
+              type: string
+              minLength: 3
+              maxLength: 50
+            description:
+              type: string
+              minLength: 3
+              maxLength: 1024
+            owner:
+              type: string
+              format: uuid
+            members:
+              type: array
+              items:
+                type: string
+                format: uuid
+          required:
+            - name
+            - description
+        Invite:
+            type: object
+            properties:
+                _id:
+                    type: string
+                createdBy:
+                    type: string
+                team:
+                    type: string
+                email:
+                    type: string
+                acceptedAt:
+                    type: string
+                declinedAt:
+                    type: string
+                deletedAt:
+                    type: string
+                isDeleted:
+                    type: boolean
+                status:
+                    type: string
+                    enum: ["Pending", "Accepted", "Declined", "Deleted"]
+
+            required:
+                - _id
+                - createdBy
+                - team
+                - email
+                - isDeleted
+        NewInvite:
+            type: object
+            properties:
+                email:
+                    type: string
+                    format: email
+            required:
+                - email
+
+        UpdateInvite:
+            type: object
+            properties:
+                status:
+                    type: string
+                    enum: ["Pending", "Accepted", "Declined", "Deleted"]
+            required:
+                - status
+        Project:
+            type: object
+            properties:
+                name:
+                    type: string
+                    minLength: 3
+                    maxLength: 50
+                    default: Project Name
+                description:
+                    type: string
+                    minLength: 3
+                    maxLength: 1024
+                    default: Description
+                createdBy:
+                    type: string
+                    format: objectId
+                team:
+                    type: string
+                    format: objectId
+                tasks:
+                    type: array
+                    items:
+                        type: string
+                        format: objectId
+                status:
+                    type: string
+                    enum: [Not Started, In Progress, Completed, Cancelled]
+                    default: Not Started
+                isDeleted:
+                    type: boolean
+                    default: false
+                deletedAt:
+                    type: string
+                    format: date-time
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+            required:
+                - name
+                - description
+                - createdBy
+                - team
+                - status
+        ProjectRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                    minLength: 3
+                    maxLength: 50
+                    default: Project Name
+                description:
+                    type: string
+                    minLength: 3
+                    maxLength: 1024
+                    default: Description
+                status:
+                    type: string
+                    enum: [Not Started, In Progress, Completed, Cancelled]
+                    default: Not Started
+            required:
+                - name
+                - description
+                - createdBy
+                - team
+                - status
+        Task:
+            type: object
+            properties:
+                name:
+                    type: string
+                    minLength: 3
+                    maxLength: 50
+                    default: Task Name
+                description:
+                    type: string
+                    minLength: 3
+                    maxLength: 1024
+                    default: Task Description
+                createdBy:
+                    type: string
+                    format: uuid
+                admins:
+                    type: array
+                    items:
+                        type: string
+                        format: uuid
+                    default: []
+                project:
+                    type: string
+                    format: uuid
+                status:
+                    type: string
+                    enum:
+                        - todo
+                        - In Progress
+                        - Done
+                        - Completed
+                        - Cancelled
+                    default: todo
+                dueDate:
+                    type: string
+                    format: date-time
+                priority:
+                    type: integer
+                    enum:
+                        - 0
+                        - 1
+                        - 2
+                    default: 0
+                isDeleted:
+                    type: boolean
+                    default: false
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+                deletedAt:
+                    type: string
+                    format: date-time
+            required:
+                - name
+                - description
+                - createdBy
+                - project
+
+        TaskRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                    minLength: 3
+                    maxLength: 50
+                    default: Task Name
+                description:
+                    type: string
+                    minLength: 3
+                    maxLength: 1024
+                    default: Task Description
+                owner:
+                    type: string
+                    format: uuid
+            required:
+                - name
+                - description
+        Comment:
+            type: object
+            properties:
+                _id:
+                    type: string
+                text:
+                    type: string
+                    minLength: 1
+                    maxLength: 1024
+                createdBy:
+                    type: string
+                    format: uuid
+                task:
+                    type: string
+                    format: uuid
+                project:
+                    type: string
+                    format: uuid
+                isDeleted:
+                    type: boolean
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+                deletedAt:
+                    type: string
+                    format: date-time
+
+        CommentRequest:
+            type: object
+            properties:
+                text:
+                    type: string
+                    minLength: 1
+                    maxLength: 1024
+                task:
+                    type: string
+                    format: uuid
+                project:
+                    type: string
+                    format: uuid
+            required:
+                - text
+            anyOf:
+                - required:
+                      - project
+                - required:
+                      - task
