@@ -15,6 +15,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     minlength: 3,
     maxlength: 50,
+    default: this.username || "Name",
   },
   email: {
     type: String,
@@ -46,6 +47,11 @@ const userSchema = new mongoose.Schema({
     required: true,
     default: Date.now,
   },
+  updatedAt: {
+    type: Date,
+    required: true,
+    default: Date.now,
+  },
 });
 userSchema.methods.generateAuthToken = function () {
   const token = jwt.sign(
@@ -68,6 +74,13 @@ userSchema.methods.set = function (user) {
 userSchema.methods.deleteUser = function () {
   this.isDeleted = true;
   this.deletedAt = Date.now();
+};
+
+userSchema.statics.checkIfUserExists = async function (username, email) {
+  const user = await this.findOne({
+    $or: [{ username: username }, { email: email }],
+  });
+  return user;
 };
 const User = mongoose.model("User", userSchema);
 

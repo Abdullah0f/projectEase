@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
-const config = require("config");
 const Joi = require("joi");
-const { userSchema } = require("./user");
 const teamSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -53,7 +51,6 @@ teamSchema.methods.setTeam = function (team) {
   this.description = team.description;
   this.owner = this.owner || team.owner;
   this.members = this.members || team.members;
-  this.createdAt = this.createdAt || Date.now();
   this.modfiedAt = Date.now();
 };
 

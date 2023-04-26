@@ -195,23 +195,31 @@ describe("Users", () => {
     });
   });
   describe("DELETE /users/:id", () => {
+    let user;
+    beforeEach(async () => {
+      user = await new User({
+        username: "abc",
+        email: "abc@abc.com",
+        password: "12345",
+      }).save();
+    });
+
+    const exec = (id) => {
+      return request(server)
+        .delete("/api/users/" + id)
+        .set("x-auth-token", user.generateAuthToken());
+    };
     it("it should return 400 if invalid id is passed", async () => {
-      const res = await request(server).delete("/api/users/1");
+      const res = await exec("1");
       expect(res.status).toBe(400);
     });
     it("should return 404 if no user with the given id exists", async () => {
       const id = new mongoose.Types.ObjectId().toHexString();
-      const res = await request(server).delete("/api/users/" + id);
+      const res = await exec(id);
       expect(res.status).toBe(404);
     });
     it("Should return 200 if user is deleted", async () => {
-      let user = {
-        username: "abc",
-        email: "abc@abc.com",
-        password: "12345",
-      };
-      user = await new User(user).save();
-      const res = await request(server).delete("/api/users/" + user._id);
+      const res = await exec(user._id);
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("username", "abc");
       user = await User.findById(user._id);

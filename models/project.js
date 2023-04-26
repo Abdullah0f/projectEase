@@ -1,9 +1,5 @@
 const mongoose = require("mongoose");
 const Joi = require("joi");
-const { Team } = require("./team");
-const { teamSchema } = require("./team");
-const { userSchema } = require("./user");
-const { taskSchema } = require("./task");
 
 const projectSchema = new mongoose.Schema({
   name: {
