@@ -52,12 +52,8 @@ Authorization is implemented using middleware functions. For example, editing a 
 
 ## Tests
 
-The backend has a comprehensive test suite with 173 tests written using Jest. To run the tests, run `npm run test`.
+The backend has a comprehensive test suite with 173 tests written using Jest. To run the tests, run `npm test`.
 
 ## Contributing
 
 Contributions are welcome! Please submit a pull request for any changes or additions.
-
-## License
-
-This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
