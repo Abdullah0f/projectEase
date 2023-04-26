@@ -8,7 +8,6 @@ const mongoose = require("mongoose");
 router.get(
   "/",
   asyncMiddleware(async (req, res) => {
-    throw new Error("could not get users");
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const users = await User.find({ isDeleted: false })
@@ -16,7 +15,6 @@ router.get(
       .skip((page - 1) * limit)
       .limit(limit)
       .sort("name");
-    console.log(users);
     res.send(users);
   })
 );

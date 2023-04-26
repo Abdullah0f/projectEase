@@ -1,6 +1,5 @@
 const winston = require("winston");
 const config = require("config");
-// require("winston-mongodb");
 
 module.exports = function () {
   winston.add(
@@ -19,10 +18,4 @@ module.exports = function () {
   if (!config.get("jwtPrivateKey")) {
     throw new Error("FATAL ERROR: jwtPrivateKey is not defined.");
   }
-  //   winston.add(
-  //     new winston.transports.MongoDB({
-  //       db: "mongodb://localhost/vidly",
-  //       options: { useUnifiedTopology: true },
-  //     })
-  //   );
 };
