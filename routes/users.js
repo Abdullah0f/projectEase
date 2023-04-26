@@ -8,6 +8,7 @@ const mongoose = require("mongoose");
 router.get(
   "/",
   asyncMiddleware(async (req, res) => {
+    throw new Error("could not get users");
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const users = await User.find({ isDeleted: false })
