@@ -6,11 +6,16 @@ ProjectEase is an application that manages projects for teams. This repository c
 
 ## API Documentation
 
-The API documentation for this project can be found [here](https://example.com/api-docs). Please refer to this documentation for detailed information on each endpoint, request and response format, and authentication requirements.
+The API documentation for this project can be found [here](https://documenter.getpostman.com/view/24815633/2s93Y6tKGX). Please refer to this documentation for detailed information on each endpoint, request and response format, and authentication requirements.
+
+## Deployment
+
+The app is deployed on Heroku and the database is hosted on Atlas.
+you can access the app at https://project-ease.herokuapp.com/api
 
 ## Technologies
 
-The backend is built using Node.js, Express.js, and MongoDB. The following Node.js libraries are used:
+The backend is built using Node.js, Express.js, and MongoDB. The following Node.js libraries are used
 
 - bcrypt
 - compression
@@ -25,7 +30,7 @@ The backend is built using Node.js, Express.js, and MongoDB. The following Node.
 
 ## API Endpoints
 
-The API endpoints are documented in the API documentation, which is hosted on Postman.
+The API endpoints are documented in the API documentation, which is hosted on Postman and can be found [here](https://documenter.getpostman.com/view/24815633/2s93Y6tKGX).
 
 ## Installation
 
